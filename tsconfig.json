@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "noLib": false
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "!./node_modules/**/*.ts"
+    ],
+    "files": [
+        "./server/app.ts",
+        "./server/config/index.ts",
+        "./server/cloudprediction/index.ts",
+        "./server/twitterwatcher/index.ts",
+        "./server/container/index.ts",
+        "./typings/index.d.ts"
+    ]
+}

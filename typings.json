@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160621231320",
+    "underscore": "registry:dt/underscore#1.7.0+20160622050840",
+    "wolfy87-eventemitter": "registry:dt/wolfy87-eventemitter#4.2.9+20160524142429"
+  }
+}

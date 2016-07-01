@@ -40,7 +40,7 @@ app.use(express.static(staticPath, { maxAge: "1d" }));
 
 server.listen(7654);
 
-tweetWatcher.track("nhs");
+// tweetWatcher.track("nhs");
 
 function pollStatus() {
   predictor.getModelById("tweetSentiment")

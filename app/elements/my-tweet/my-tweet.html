@@ -10,8 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="..\..\bower_components/polymer/polymer.html">
 <link rel="import" href="..\..\bower_components/neon-animation/neon-animation.html">
-<link rel="import" href="..\..\bower_components/paper-button/paper-button.html">
-<link rel="import" href="..\paper-fab/paper-fab.html">
+<link rel="import" href="..\..\bower_components/paper-progress/paper-progress.html">
 
 <dom-module id="my-tweet">
   <template>
@@ -19,115 +18,93 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host {
         display: block;
       }
-      
-      paper-fab {
-        font-size: small;
-        margin-left: 5px;
-        margin-right: 5px;
-      }
-      
-      #irrelevant {
-        background: rgba(255, 255, 255, 0.5);
-        color: #333;
-      }
-      
-      #angry {
-        background: rgba(255, 0, 0, 0.5);
-      }
-      
-      #neutral {
-        background: rgba(0, 0, 255, 0.5);
-      }
-      
-      #positive {
-        background: rgba(0, 255, 0, 0.5);
-      }
     </style>
-    <div id="tweetContainer" class="layout vertical center" style="height:100%; padding:0 10px 10px 10px"></div>
+    <div id="tweetContainer" class="layout vertical center">
+      <paper-progress indeterminate hidden$="{{!loading}}">
+    </div>
   </template>
   <script>
-  (function() {
-    'use strict';
+    (function() {
+      'use strict';
 
-    Polymer({
-      is: 'my-tweet',
+      Polymer({
+        is: 'my-tweet',
 
-      properties: {
-        id: {
-          type: String
-        },
-        tweet: {
-          type: Object,
-          observer: '_changeTweet'
-        },
-        animationConfig: {
-          value: function() {
-            return {
-              'entry': {
-                name: 'fade-in-animation',
-                node: this
-              },
-              'exit': [{
-                name: 'fade-out-animation',
-                node: this
-              },{
-                name: 'scale-down-animation',
-                node: this
-              }]
+        properties: {
+          tweet: {
+            type: Object,
+            observer: '_changeTweet'
+          },
+          loading: {
+            type: Boolean,
+            notify: true,
+            value: true
+          },
+          animationConfig: {
+            value: function() {
+              return {
+                'entry': {
+                  name: 'fade-in-animation',
+                  node: this
+                },
+                'exit': [{
+                  name: 'fade-out-animation',
+                  node: this
+                }, {
+                  name: 'scale-down-animation',
+                  node: this
+                }]
+              }
             }
           }
-        }
-      },
+        },
 
-      behaviors: [
-        Polymer.NeonAnimationRunnerBehavior
-      ],
+        behaviors: [
+          Polymer.NeonAnimationRunnerBehavior
+        ],
 
-      listeners: {
-        'neon-animation-finish': '_onNeonAnimationFinish'
-      },
+        listeners: {
+          'neon-animation-finish': '_onNeonAnimationFinish'
+        },
 
-      _changeTweet: function(newTweet) {
-        if (newTweet) {
-          TwitterWidgetsLoader.load((twttr) => {
+        _changeTweet: function(newTweet) {
+          if (newTweet) {
+            TwitterWidgetsLoader.load((twttr) => {
               twttr.widgets.createTweet(newTweet.id_str,
-              this.$.tweetContainer,
-              {
-                width: "250"
-              }).then((result) => {
-                this.fire('loaded', { tweetId: newTweet.id_str, tweetFrame: result });
+                this.$.tweetContainer, {
+                  width: "400"
+                }).then((result, err) => {
+                if (err) {
+                  console.log('another tweet loader error', err);
+                }
+                this.loading = false;
+                this.fire('loaded', {
+                  tweetId: newTweet.id_str,
+                  tweetFrame: result
+                });
               }, (err) => {
                 console.log('could not load tweet', err);
               }).catch((err) => {
                 console.log('could not load tweet2', err);
               });
-          });
+            });
+          }
+        },
+
+        hideAnimation: function() {
+          this.playAnimation('exit');
+          setTimeout(() => {
+            this.fire('hidden', {
+              tweetId: this.id
+            });
+          }, 1000);
+        },
+
+        _onNeonAnimationFinish: function() {
+          this.style.display = "none";
         }
-      },
 
-      ready: function() {
-        if (this.tweet) {
-          this.fire('tweetready', { tweetId: this.tweet.id_str });
-        } else {
-          this.fire('tweetready');
-        }
-        // setTimeout(() => {
-        //   this.selfDestruct();
-        // }, 60000);
-      },
-
-      selfDestruct: function() {
-        this.playAnimation('exit');
-        setTimeout(() => {
-          this.fire('classified', { tweetId: this.id });
-        }, 1000);
-      },
-
-      _onNeonAnimationFinish: function() {
-        this.style.display = "none";
-      }
-
-    });
-  })();
+      });
+    })();
   </script>
 </dom-module>

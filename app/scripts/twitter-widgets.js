@@ -56,7 +56,8 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 window.twttr = (function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0],
+    var js, 
+        fjs = d.getElementsByTagName(s)[0],
         t = window.twttr || {};
     if (d.getElementById(id)) return t;
     js = d.createElement(s);

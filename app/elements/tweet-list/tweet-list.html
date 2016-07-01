@@ -83,6 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       div::shadow .carousel-cell {
         width: 60%;
         height: 500px;
+        border: 1px solid black;
       }
     </style>
 
@@ -110,6 +111,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
       <div id="carousel" class="carousel">
+        <!--<template is="dom-repeat" items="{{tweets}}">
+          <my-tweet class="carousel-cell" id="tweet[[item.id_str]]" tweet="[[item]]"></my-tweet>
+        </template>-->
       </div>
 
       <paper-toolbar class="bottom" justify="end">
@@ -161,7 +165,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         listeners: {
-          'classified': '_classified',
+          'hidden': '_hidden',
           'loaded': '_loaded'
         },
 
@@ -173,16 +177,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.log('adding tweet', tweet.id_str);
 
           let newTweet = document.createElement("my-tweet");
-          newTweet.tweet = tweet;
           newTweet.className += "carousel-cell";
-          // newTweet.setAttribute("id", "tweet" + tweet.id_str);
-
+          newTweet.setAttribute("id", "tweet" + tweet.id_str);
+          
           this.flickity.append(newTweet);
+          this.resize();
+
+          newTweet.tweet = tweet;
         },
 
         resize: function() {
           this.flickity.resize();
-          this.flickity.reposition();
         },
 
         add: function() {
@@ -207,8 +212,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }, (nextTweet) => {
             this.addTweet(nextTweet);
           });
-
-          tweet.selfDestruct();
         },
 
         ready: function() {
@@ -238,16 +241,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           app.socket.emit("train");
         },
 
-        _classified: function(e) {
-          let classifiedTweet = this.$$("#tweet" + e.detail.tweetId);
-          console.log('classified, attempting to remove', classifiedTweet);
-          this.flickity.remove(classifiedTweet);
+        _hidden: function(e) {
+          let hiddenTweet = this.$$("#tweet" + e.detail.tweetId);
+          console.log('hidden, attempting to remove', e.detail.tweetId, hiddenTweet);
+          this.flickity.remove(hiddenTweet);
+          this.resize();
+          this.flickity.next(false);
         },
 
         _loaded: function(e) {
           console.log("loaded", e.detail)
+          let tweet = this.flickity.selectedElement;
+
+          if (this.flickity.cells.length > 1) {
+            this.flickity.cells[0].element.hideAnimation();
+          }
+
           this.resize();
-          // this.flickity.next(false);
         },
 
         _changeApiMode: function(newMode) {

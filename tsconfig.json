@@ -4,7 +4,8 @@
         "module": "commonjs",
         "declaration": false,
         "noImplicitAny": false,
-        "noLib": false
+        "noLib": false,
+        "outDir": "dist/server"
     },
     "filesGlob": [
         "./**/*.ts",
@@ -16,6 +17,7 @@
         "./server/cloudprediction/index.ts",
         "./server/twitterwatcher/index.ts",
         "./server/container/index.ts",
+        "./server/database/index.ts",
         "./typings/index.d.ts"
     ]
 }

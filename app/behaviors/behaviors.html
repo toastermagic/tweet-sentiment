@@ -1,0 +1,36 @@
+<!-- by importing this script into our elements we can share behaviors -->
+<script>  
+    var FiltersBehavior = {
+        niceScore: function(score) {
+            return Math.floor(score * 100);
+        } 
+        // uppercase: function(text) { 
+        //     return text.toUpperCase(); 
+        // }, 
+        // json: function (obj, multiline) {
+        //     if (multiline) {
+        //         return JSON.stringify(obj, undefined, 2); 
+        //     } else {
+        //         return JSON.stringify(obj); 
+        //     }
+        // },
+        // timeSince: function(someTime) {
+        //     if (!someTime || Date.parse(someTime) === NaN) {
+        //         return "Never";
+        //     }
+        //     return moment(new Date(someTime)).fromNow()
+        // },
+        // timeUntil: function(someTime) {
+        //     if (!someTime || Date.parse(someTime) === NaN) {
+        //         return "Never";
+        //     }
+        //     return moment(new Date(someTime)).fromNow()
+        // },
+        // niceDate: function(someTime) {
+        //     if (!someTime || Date.parse(someTime) === NaN) {
+        //         return "Never";
+        //     }
+        //     return moment(new Date(someTime)).format('MMMM Do YYYY, h:mm:ss a');            
+        // }
+    };
+</script>

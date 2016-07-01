@@ -1,0 +1,272 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="..\..\bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="..\..\bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="..\..\bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="..\..\bower_components/paper-button/paper-button.html">
+<link rel="import" href="..\..\bower_components/iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="tweet-list">
+  <template>
+    <style include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+      }
+      
+      my-tweet {
+        margin: 15px;
+        transition: all 150ms ease-in-out;
+      }
+      
+      paper-radio-button {
+        --paper-radio-button-checked-color: #ccc;
+        --paper-radio-button-unchecked-color: #ccc;
+        --paper-radio-button-label-color: #ccc;
+      }
+      
+      paper-fab {
+        margin-bottom: 10px;
+      }
+      
+      #irrelevant {
+        background: rgba(255, 255, 255, 0.5);
+        color: #333;
+      }
+      
+      #angry {
+        background: rgba(255, 0, 0, 0.5);
+      }
+      
+      #neutral {
+        background: rgba(0, 0, 255, 0.5);
+      }
+      
+      #positive {
+        background: rgba(0, 255, 0, 0.5);
+      }
+      
+      paper-progress {
+        width: 100%;
+        height: 3px;
+        position: absolute;
+        left: 0;
+        right: 0;
+      }
+      
+      paper-toolbar.bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0px;
+      }
+      
+      paper-toolbar::shadow #topBar {
+        padding: 0px;
+      }
+      
+      .carousel {
+        height: 500px;
+        width: 100%;
+      }
+      
+      div::shadow .carousel-cell {
+        width: 60%;
+        height: 500px;
+      }
+    </style>
+
+    <div class="layout vertical center">
+      <span style="width: 25%; margin: 10px;">
+        <span hidden$="{{tweet.output}}" class="layout horizontal around-justified">
+          <span class="layout vertical center">
+            <paper-fab title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
+            <span>Irrelevant</span>
+      </span>
+      <span class="layout vertical center">
+            <paper-fab title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
+            <span>Angry</span>
+      </span>
+      <span class="layout vertical center">
+            <paper-fab title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="classify" raised></paper-fab>
+            <span>Neutral</span>
+      </span>
+      <span class="layout vertical center">
+            <paper-fab title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
+            <span>Positive</span>
+      </span>
+      </span>
+      </span>
+
+
+      <div id="carousel" class="carousel">
+      </div>
+
+      <paper-toolbar class="bottom" justify="end">
+        <div style="width:100%; height 3px; position: absolute">
+          <template id="progress" is="dom-if" if="{{training}}">
+            <paper-progress indeterminate></paper-progress>
+          </template>
+  </div>
+  <span style="margin-left:16px">{{statusMessage}}</span>
+  <span class="flex"></span>
+  <span style="color:#ccc">API Mode:</span>
+  <paper-radio-group disabled$="{{training}}" selected="{{apiMode}}">
+    <paper-radio-button name="learn">Learn</paper-radio-button>
+    <paper-radio-button name="predict">Predict</paper-radio-button>
+  </paper-radio-group>
+  <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
+  <paper-button raised style="background:#0c0; margin-right:16px" on-tap="resize">resize</paper-button>
+  <paper-button raised style="background:#0c0; margin-right:16px" on-tap="add">add</paper-button>
+  </paper-toolbar>
+  </div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'tweet-list',
+
+        properties: {
+          tweets: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          tweetCache: Array,
+          apiMode: {
+            type: String,
+            value: 'learn',
+            observer: '_changeApiMode'
+          },
+          flickity: Object,
+          training: Boolean,
+          statusMessage: String,
+          receiving: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        listeners: {
+          'classified': '_classified',
+          'loaded': '_loaded'
+        },
+
+        addTweet: function(tweet) {
+          if (!tweet) {
+            return;
+          }
+
+          console.log('adding tweet', tweet.id_str);
+
+          let newTweet = document.createElement("my-tweet");
+          newTweet.tweet = tweet;
+          newTweet.className += "carousel-cell";
+          // newTweet.setAttribute("id", "tweet" + tweet.id_str);
+
+          this.flickity.append(newTweet);
+        },
+
+        resize: function() {
+          this.flickity.resize();
+          this.flickity.reposition();
+        },
+
+        add: function() {
+          app.socket.emit("tweetRequest", (tweet) => {
+            console.log('tweet request fulfilled', tweet.id_str);
+            this.addTweet(tweet);
+          });
+        },
+
+        classify: function(e) {
+          let tweet = this.flickity.selectedElement;
+          if (!tweet) {
+            return;
+          }
+
+          //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
+          console.log('classifying', tweet.tweet.id_str, 'as', e.currentTarget.id);
+
+          app.socket.emit("classify", {
+            tweetId: tweet.tweet.id_str,
+            class: e.currentTarget.id
+          }, (nextTweet) => {
+            this.addTweet(nextTweet);
+          });
+
+          tweet.selfDestruct();
+        },
+
+        ready: function() {
+          var carousel = document.querySelector('#carousel');
+          this.flickity = new Flickity(this.$.carousel, {
+            useSetGallerySize: false,
+            cellSelector: ".carousel-cell"
+          });
+
+          // app.socket.on("tweet", (tweet) => {
+          //   if (this.receiving) {
+          //     this.addTweet(tweet);
+          //   }
+
+          //   // while (this.tweets.length > 15) {
+          //   //   this.$$("#tweet" + this.tweets[0].id_str).selfDestruct();
+          //   // }
+          // });
+
+          app.socket.on("trainingStatus", (status) => {
+            this.training = status.status === "RUNNING";
+            this.statusMessage = status.message;
+          });
+        },
+
+        train: function() {
+          app.socket.emit("train");
+        },
+
+        _classified: function(e) {
+          let classifiedTweet = this.$$("#tweet" + e.detail.tweetId);
+          console.log('classified, attempting to remove', classifiedTweet);
+          this.flickity.remove(classifiedTweet);
+        },
+
+        _loaded: function(e) {
+          console.log("loaded", e.detail)
+          this.resize();
+          // this.flickity.next(false);
+        },
+
+        _changeApiMode: function(newMode) {
+          app.socket.emit("apiMode", newMode);
+          for (var index = 0; index < this.tweets.length; index++) {
+            this.flickity.remove(this.$$("#carousel" + this.tweets[index].id_str));
+          }
+
+          this.tweets = [];
+
+          if (newMode == "learn") {
+            // app.socket.emit("tweetList", (response) => {
+            //   this.tweetCache = response;
+
+            //   this.addTweet(this.tweetCache.pop());
+            // });
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

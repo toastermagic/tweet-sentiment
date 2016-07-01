@@ -30,16 +30,11 @@ export class Config {
     // Path to the JSON key file you downloaded when you created the Service Account
     // credentials for your Google Cloud project.
     // See https://console.developers.google.com/project/<projectId>/apiui/credential
-    keyFile: "../../cloudPredictionServiceAccount.json",
+    keyFile: "../../../cloudPredictionServiceAccount.json",
     // Datastore Namespace
     namespace: "LabelCat"
   };
 
-  // Configuration for GitHub authentication
-  twitter: any = {
-    consumer_key: "0BtxpLJ1RlTtp1XL9LduRNezd",
-    consumer_secret: "vjPJYDofLsmOmYw6izgFhgRThMtiwv15Hu1DDbqYJDoV491e7l",
-    access_token_key: "17777662-IPtB8f69aLlJd0iFYZaWatM16uMOOXm6gdDRAJfbw",
-    access_token_secret: "7ZhnZTgPD1naCgSmfrnfEaTHRrgIsEnJd4JlfeCUjERGo"
-  };
+  // Configuration for Twitter authentication
+  twitter: any = require("../../../twitter-config.json");
 };

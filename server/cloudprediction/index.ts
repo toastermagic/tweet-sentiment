@@ -14,11 +14,14 @@
 
 "use strict";
 
-export class CloudPredictor {
+let google = require("googleapis");
 
-    constructor(prom: any, private config: any, private container: any) {
-        this.config = config;
-    }
+export class CloudPredictor {
+  trainedmodels: any = google.prediction("v1.6").trainedmodels;
+
+  constructor(prom: any, private config: any, private container: any) {
+    this.config = config;
+  }
 
   /**
    * Authorize and execute the specified Prediction API method.
@@ -31,6 +34,7 @@ export class CloudPredictor {
   private execute(method: String, params: any) {
     //  TODO: Does this authorization need to be done on every call?
     let jwtClient = this.container.get("jwtClient");
+    var self = this;
     return jwtClient.authorizeAsync().then(() => {
       params.auth = jwtClient;
       params.project = this.config.gcloud.projectId;
@@ -39,138 +43,84 @@ export class CloudPredictor {
   }
 
   /**
-   * Group the given issues by their labels.
+   * Return the analysis of the trained model with the given id.
    *
-   * @private
-   *
-   * @param {array} issues - The issues to group.
+   * @param {number} id - The id of the model analysis to retrieve.
    */
-  private groupByLabel(issues) {
-    let groups = {};
-    issues.forEach(function (issue) {
-      issue.labels.forEach(function (label) {
-        if (!groups.hasOwnProperty(label.name)) {
-          groups[label.name] = [];
-        }
-        groups[label.name].push(issue);
-      });
+  analyzeModelById(id: String) {
+    return this.execute("analyze", {
+      id
     });
-    return groups;
   }
 
-    /**
-     * Return the analysis of the trained model with the given id.
-     *
-     * @param {number} id - The id of the model analysis to retrieve.
-     */
-    analyzeModelById(id: Number) {
-      return this.execute("analyze", {
-        id
-      });
-    }
+  /**
+   * Return the trained model with the given id.
+   *
+   * @param {number} id - The id of the model to retrieve.
+   */
+  getModelById(id: String) {
+    return this.execute("get", {
+      id
+    });
+  }
 
-    /**
-     * Return the trained model with the given id.
-     *
-     * @param {number} id - The id of the model to retrieve.
-     */
-    getModelById(id: Number) {
-      return this.execute("get", {
-        id
-      });
-    }
+  /**
+   * Destroy model with the given id.
+   *
+   * @param {number} id - The id of the model to destroy.
+   */
+  destroyModelById(id: String) {
+    return this.execute("delete", {
+      id
+    });
+  }
 
-    /**
-     * Destroy model with the given id.
-     *
-     * @param {number} id - The id of the model to destroy.
-     */
-    destroyModelById(id: Number) {
-      return this.execute("delete", {
-        id
-      });
-    }
-
-    /**
-     * Train the model with the given id and the provided examples.
-     *
-     * @param {number} id - The id of the model to train.
-     * @param {array} examples - The examples with which to train the model.
-     */
-    trainModel(id: Number, examples: any[]) {
-      return this.execute("insert", {
-        resource: {
-          id,
-          modelType: "classification",
-          trainingInstances: examples
-        }
-      });
-    }
-
-    /**
-     * Predict a class for the given example using the model with the provided id.
-     *
-     * @param {number} id - The id of the model to train.
-     * @param {obejct} example - The example for which to predict a class.
-     */
-    predict(id: Number, example: any) {
-      return this.execute("predict", {
+  /**
+   * Train the model with the given id and the provided examples.
+   *
+   * @param {number} id - The id of the model to train.
+   * @param {array} examples - The examples with which to train the model.
+   */
+  trainModel(id: String, examples: any[]) {
+    return this.execute("insert", {
+      resource: {
         id,
-        resource: {
-          input: {
-            csvInstance: example.csvInstance
-          }
+        modelType: "classification",
+        trainingInstances: examples
+      }
+    });
+  }
+
+  /**
+   * Update the model with the given id and the provided examples.
+   *
+   * @param {string} id - The id of the model to train.
+   * @param {array} examples - The examples with which to train the model.
+   */
+  updateModel(id: String, csvInstance: string, output: string) {
+    return this.execute("update", {
+      id,
+      resource: {
+        csvInstance: [csvInstance],
+        output
+      }
+    });
+  }
+
+  /**
+   * Predict a class for the given example using the model with the provided id.
+   *
+   * @param {number} id - The id of the model to train.
+   * @param {obejct} example - The example for which to predict a class.
+   */
+  predict(id: String, example: any) {
+    return this.execute("predict", {
+      id,
+      resource: {
+        input: {
+          csvInstance: example.csvInstance
         }
-      });
-    }
-
-    /**
-     * Create a training example from the given issue.
-     *
-     * @param {object} issue - The issue from which to create the training example.
-     */
-    createExample(issue: any) {
-      return {
-        output: null,
-        csvInstance: [
-          issue.title,
-          issue.title.indexOf("?") !== -1 ? 1 : 0,
-          issue.user.login,
-          issue.body,
-          issue.comments
-        ]
       }
-    }
-
-    /**
-     * Create the positive and negative training exampels from the given issues.
-     *
-     * @param {object} model - The model for which the examples are to be created.
-     * @param {array} issues - The issues from which to create the training examples.
-     */
-    createExamples(model: any, issues: any[]) {
-      let label = model.get("label");
-      let groups = this.groupByLabel(issues);
-      if (!groups[model.get("label")]) {
-        throw new Error("No issues found with model\'s label!");
-      }
-      let positiveExamples = groups[label].map(this.createExample);
-      positiveExamples.forEach(function (example) {
-        example.output = 1;
-      });
-      let negativeExamples = issues.filter(function (issue) {
-        let hasLabel = false;
-        issue.labels.forEach(function (_label) {
-          if (_label.name === label) {
-            hasLabel = true;
-            return false;
-          }
-        });
-        return !hasLabel && issue.labels.length;
-      }).map(this.createExample);
-      negativeExamples.forEach(function (example) {
-        example.output = 0;
-      });
-      return positiveExamples.concat(negativeExamples);
-    }
+    });
+  }
 }

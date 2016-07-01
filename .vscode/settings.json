@@ -8,7 +8,7 @@
             "when": "$(basename).ts"
         },
         "typings": false,
-        ".gitignore": true,
+        ".gitignore": false,
         "node_modules": false
     }
 }

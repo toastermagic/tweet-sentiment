@@ -1,2 +1,8 @@
 node_modules
-typings
+dist
+bower_components
+.tmp
+.publish/
+typings/
+cloudPredictionServiceAccount.json
+twitter-config.json

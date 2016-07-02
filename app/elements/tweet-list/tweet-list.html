@@ -34,12 +34,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-radio-button-label-color: #ccc;
       }
       
-      paper-checkbox {
-        --paper-checkbox-checked-color: #ccc;
-        --paper-checkbox-unchecked-color: #ccc;
-        --paper-checkbox-label-color: #ccc;
-      }
-      
       paper-fab {
         margin-bottom: 10px;
       }
@@ -87,33 +81,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-decoration: underline;
       }
     </style>
-    <div class="layout vertical center">
-      <div class="flex" style="width:100%">
-        <div id="tweetStack" style="width:100%; height:100%; border: 1px solid black">
-        </div>
+    <div class="layout horizontal end">
+      <span class="flex"></span>
+      <paper-fab title="shuffle" raised icon="shuffle" on-tap="shuffle">shuffle</paper-fab>
+      <paper-fab title="find old" raised icon="add" on-tap="add">add</paper-fab>
+    </div>
+
+    <div class="layout horizontal center">
+      <div class="flex" id="tweetStack">
       </div>
-      <paper-toolbar class="bottom" justify="end">
-        <div style="width:100%; height 3px; position: absolute">
-          <template id="progress" is="dom-if" if="{{training}}">
-            <paper-progress indeterminate></paper-progress>
-          </template>
-        </div>
-        <span style="margin-left:16px">{{statusMessage}}</span>
-        <span class="flex"></span>
-        <span>
-          <span>
-            <label for="subscribe" style="color:#ccc">Live:</label>
-            <paper-checkbox id="subscribe" checked="{{subscribed}}"></paper-checkbox>
-          </span>
-        </span>
-        <span>
-          <label for="predict" style="color:#ccc">Predict:</label>
-          <paper-checkbox id="predict" on-change="changePredictMode"></paper-checkbox>
-        <span>
-        <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
-        <paper-button raised style="background:#0c0; margin-right:16px" on-tap="shuffle">shuffle</paper-button>
-        <paper-button raised style="background:#0c0; margin-right:16px" on-tap="add">add</paper-button>
-      </paper-toolbar>
     </div>
   </template>
   <script>
@@ -130,11 +106,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               return [];
             }
           },
-          apiMode: {
-            type: String,
-            value: 'learn',
-            observer: '_changeApiMode'
-          },
           output: {
             type: Object,
             notify: true
@@ -142,26 +113,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           packery: Object,
           training: Boolean,
           statusMessage: String,
-          tweetSubscription: Object,
-          tweetPausable: Object,
-          subscribed: {
-            type: Boolean,
-            value: false,
-            observer: '_changeSubscribed'
-          }
-        },
-
-        isAngry: function(val) {
-          return val === "angry" ? "predicted" : "";
-        },
-        isNeutral: function(val) {
-          return val === "neutral" ? "predicted" : "";
-        },
-        isPositive: function(val) {
-          return val === "positive" ? "predicted" : "";
-        },
-        isIrrelevant: function(val) {
-          return val === "irrelevant" ? "predicted" : "";
+          tweetSubscription: Object
         },
 
         listeners: {
@@ -262,47 +214,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             gutter: 10
           });
 
-          this.statusSubscription = mySocket.statusStream.subscribe((status) => {
-            this.training = status.training;
-            this.statusMessage = status.message;
+          this.tweetSubscription = app.$.tweetbar.tweetStream.subscribeOnNext((tweet) => {
+            if (this.packery.items.length < 30) {
+              this.showTweet(tweet, false);
+            }
           });
         },
 
-        _changeSubscribed: function(newSubscribed) {
-          if (newSubscribed) {
-            if (!this.tweetSubscription) {
-              console.log('creating new subscription')
-              
-              this.tweetPausable = mySocket.tweetStream().pausable();
-              this.tweetSubscription = this.tweetPausable.subscribeOnNext((tweet) => {
-                if (this.packery.items.length < 30) {
-                  this.showTweet(tweet, false);
-                }
-              });
-            } 
-
-            console.log('resuming tweet subscription')
-            this.tweetPausable.resume();
-          } else {
-            if (this.tweetSubscription) {
-              console.log('pausing tweet subscription')
-              this.tweetPausable.pause();
-            }
-          }
-        },
-
-        train: function() {
-          mySocket.sendCommand("train");
-        },
-
-        changePredictMode: function() {
-          if (this.apiMode == "learn") {
-            this.apiMode = "predict";
-          } else {
-            this.apiMode = "learn";
-          }
-        },
-        
         _removeMe: function(e) {
           console.log('hidden, ready to remove', e.target);
           this.packery.remove(e.target);
@@ -311,10 +229,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _loaded: function(e) {
           console.log("loaded", e.detail)
-        },
-
-        _changeApiMode: function(newMode) {
-          mySocket.sendCommand("apiMode", newMode);
         }
       });
     })();

@@ -1,11 +1,15 @@
 var socket = io();
 
 var mySocket = {
-    tweetStream: Rx.Observable.create((observer) => {
-        socket.on("tweet", (tweet) => {
-            observer.onNext(tweet);
+    tweetStream: () => {
+        let streamSource = Rx.Observable.create((observer) => {
+            socket.on("tweet", (tweet) => {
+                observer.onNext(tweet);
+            });
         });
-    }),
+
+        return streamSource;
+    },
     statusStream: Rx.Observable.create((observer) => {
         socket.on("trainingStatus", (status) => {
             observer.onNext({
@@ -21,9 +25,7 @@ var mySocket = {
                     afterTweetId,
                     limit
                 }, (tweets) => {
-                    for (var index = 0; index < tweets.length; index++) {
-                        observer.onNext(tweets[index]);
-                    }
+                    observer.onNext(tweets);
                 });
         });
     },
@@ -34,6 +36,6 @@ var mySocket = {
         });
     },
     sendCommand: (commandName, options) => {
-        socket.emit("commandName", options);
+        socket.emit(commandName, options);
     }
 };

@@ -18,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="tweet-list">
   <template>
-    <style include="iron-flex iron-flex-alignment">
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -26,7 +26,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .hovered {
         z-index: 500;
       }
-
+      
       paper-radio-button {
         --paper-radio-button-checked-color: #ccc;
         --paper-radio-button-unchecked-color: #ccc;
@@ -68,6 +68,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         left: 0;
         right: 0;
         padding: 0px;
+        z-index: 9999;
       }
       
       paper-toolbar::shadow #topBar {
@@ -98,7 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-radio-button name="predict">Predict</paper-radio-button>
         </paper-radio-group>
         <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
-        <paper-button raised style="background:#0c0; margin-right:16px" on-tap="movenext">next</paper-button>
+        <paper-button raised style="background:#0c0; margin-right:16px" on-tap="shuffle">shuffle</paper-button>
         <paper-button raised style="background:#0c0; margin-right:16px" on-tap="add">add</paper-button>
       </paper-toolbar>
     </div>
@@ -149,15 +150,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'hidden': '_hidden',
           'loaded': '_loaded',
           'hovered': '_hovered',
-          'unHovered': '_unHovered'
+          'unHovered': '_unHovered',
+          'classified': '_classified'
         },
 
         _hovered: function(e) {
           e.target.style.zIndex = 500;
+          e.target.classList.add("ignore-shuffle");
         },
 
         _unHovered: function(e) {
           e.target.style.zIndex = e.target.zIndex;
+          e.target.classList.remove("ignore-shuffle");
         },
 
         makeTweetElement: function(tweet) {
@@ -202,14 +206,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
         },
 
-        movenext: function(currentTweetId) {
-          //  get a new tweet
-          mySocket
-            .requestTweets(currentTweetId, 1)
-            .take(1)
-            .subscribe((tweet) => {
-              this.showTweet(tweet, true);
+        shuffle: function(currentTweetId) {
+            var shufflers = [];
+            var nonShufflers = [];
+            for ( var i=0, len = this.packery.items.length; i < len; i++ ) {
+              var item = this.packery.items[i];
+              var collection = item.element.classList.contains('ignore-shuffle') ? nonShufflers : shufflers;
+              collection.push( item );
+            }
+
+            shufflers.sort( function() {
+              return Math.random() > 0.5;
             });
+            this.packery.items = nonShufflers.concat(shufflers);
+            this.packery.layout();
         },
 
         add: function() {
@@ -222,14 +232,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
         },
 
-        classify: function(e) {
-          if (!tweet) {
-            return;
-          }
-          let tweetId = tweet.element.tweet.id_str;
-          //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
-          console.log('classifying', tweetId, 'as', e.currentTarget.id);
-          mySocket.classifyTweet(tweetId, e.currentTarget.id);
+        _classified: function(e) {
+          console.log('classifying', e.detail.tweetId, 'as', e.detail.classification);
+          mySocket.classifyTweet(e.detail);
         },
 
         ready: function() {

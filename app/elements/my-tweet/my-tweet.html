@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="..\..\bower_components/polymer/polymer.html">
 <link rel="import" href="..\..\bower_components/neon-animation/neon-animation.html">
-<link rel="import" href="..\..\bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="..\..\bower_components/paper-spinner/paper-spinner.html">
 
 <dom-module id="my-tweet">
   <template>
@@ -20,7 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <div id="tweetContainer" class="layout vertical center">
-      <paper-progress indeterminate hidden$="{{!loading}}">
+      <paper-spinner style="position:relative; top: 100px;" active="{{loading}}"></paper-spinner>
     </div>
   </template>
   <script>
@@ -32,8 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         properties: {
           tweet: {
-            type: Object,
-            observer: '_changeTweet'
+            type: Object
           },
           loading: {
             type: Boolean,
@@ -67,43 +66,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'neon-animation-finish': '_onNeonAnimationFinish'
         },
 
-        _changeTweet: function(newTweet) {
-          if (newTweet) {
-            TwitterWidgetsLoader.load((twttr) => {
-              twttr.widgets.createTweet(newTweet.id_str,
-                this.$.tweetContainer, {
-                  width: "400"
-                }).then((result, err) => {
-                if (err) {
-                  console.log('another tweet loader error', err);
-                }
-                this.loading = false;
-                this.fire('loaded', {
-                  tweetId: newTweet.id_str,
-                  tweetFrame: result
-                });
-              }, (err) => {
-                console.log('could not load tweet', err);
-              }).catch((err) => {
-                console.log('could not load tweet2', err);
-              });
-            });
-          }
-        },
-
         hideAnimation: function() {
           this.playAnimation('exit');
-          setTimeout(() => {
-            this.fire('hidden', {
-              tweetId: this.id
-            });
-          }, 1000);
         },
 
         _onNeonAnimationFinish: function() {
           this.style.display = "none";
-        }
 
+          this.fire('hidden', {
+            tweetId: this.tweet.id_str
+          });
+        },
+
+        fetchTweetAsync: function(tweetId) {
+          let p = new Promise((res, rej) => {
+            TwitterWidgetsLoader.load((twttr) => {
+              twttr.widgets.createTweet(tweetId,
+                this.$.tweetContainer, {
+                  width: "300"
+                }).then((result, err) => {
+                if (err) {
+                  rej(err);
+                }
+                res({
+                  tweetId: tweetId,
+                  tweetFrame: result
+                });
+              }, (err) => {
+                rej(err);
+              }).catch((err) => {
+                rej(err);
+              });
+            })
+          });
+
+          return p;
+        }
       });
     })();
   </script>

@@ -27,6 +27,33 @@ export class Database {
             });
     }
 
+    deleteTweet(tweetId: String) {
+        return new Promise((res, rej) => {
+            couch
+                .get("training", "_design/trainingTweets/_view/by_tweetId", { keys: [tweetId] })
+                .then((result) => {
+                    if (result.data.rows.length === 0) {
+                        console.log("Could not find tweet with id", tweetId);
+                        rej(`Could not find tweet with id ${tweetId}`);
+                    }
+
+                    let doc = result.data.rows[0];
+
+                    couch.del("training", doc.value._id, doc.value._rev)
+                    .then(() => {
+                        console.log("bad tweet deleted");
+                        res();
+                    }, err => {
+                        console.log("couldn't delete bad tweet", err);
+                        rej(err);
+                    });
+                }, err => {
+                    console.log("error locationg tweet with id", tweetId, err);
+                    rej(err);
+                });
+        });
+    }
+
     updateTweet(tweetId: String, classification: String) {
         return new Promise((res, rej) => {
             couch
@@ -78,8 +105,8 @@ export class Database {
             };
 
             if (lastTweetId) {
-                options.offset = 1;
-                options.startKey = lastTweetId;
+                options.skip = 1;
+                options.startkey = lastTweetId;
             };
 
             couch.get("training", "_design/trainingTweets/_view/unclassified", options)

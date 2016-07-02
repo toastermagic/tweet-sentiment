@@ -18,9 +18,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host {
         display: block;
       }
+      
+      paper-spinner {
+        position: relative;
+        top: 100px;
+      }
     </style>
-    <div id="tweetContainer" class="layout vertical center">
-      <paper-spinner style="position:relative; top: 100px;" active="{{loading}}"></paper-spinner>
+    <div id="spinnerContainer" class="layout vertical center">
+      <paper-spinner active="{{loading}}"></paper-spinner>
+    </div>
+    <div id="tweetContainer" hidden$="{{loading}}" class="layout vertical center">
     </div>
   </template>
   <script>
@@ -80,11 +87,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         fetchTweetAsync: function(tweetId) {
           let p = new Promise((res, rej) => {
+            this.loading = true;
             TwitterWidgetsLoader.load((twttr) => {
               twttr.widgets.createTweet(tweetId,
                 this.$.tweetContainer, {
                   width: "300"
                 }).then((result, err) => {
+
+                this.loading = false;
+
                 if (err) {
                   rej(err);
                 }

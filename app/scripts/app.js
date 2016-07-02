@@ -18,8 +18,6 @@ http://polymer.github.io/PATENTS.txt
   // Learn more about auto-binding templates at http://goo.gl/Dx1u2g
   var app = document.querySelector('#app');
 
-  app.socket = io();
-
   app.showProgress = false;
 
   // Sets app default base URL

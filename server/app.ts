@@ -40,7 +40,7 @@ app.use(express.static(staticPath, { maxAge: "1d" }));
 
 server.listen(7654);
 
-// tweetWatcher.track("nhs");
+tweetWatcher.track("nhs");
 
 function pollStatus() {
   predictor.getModelById("tweetSentiment")
@@ -154,13 +154,13 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
     db.deleteTweet(tweetId);
   });
 
-  socket.on("tweetRequest", (tweetId, callback) => {
+  socket.on("tweetRequest", (options, callback) => {
     console.log("tweetRequest");
 
-    db.getNextUnclassifiedTweet(tweetId).then((tweet: ITweet) => {
+    db.getNextUnclassifiedTweet(options.tweetId).then((tweet: ITweet) => {
       console.log("sending", tweet.id_str);
       convertTweet(tweet)
-        .then((newTweet) => callback(newTweet));
+        .then((newTweet) => callback([newTweet]));
     });
   });
 

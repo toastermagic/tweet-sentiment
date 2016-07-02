@@ -8,7 +8,7 @@ var mySocket = {
             });
         });
 
-        return streamSource;
+        return streamSource.pausable();
     },
     statusStream: Rx.Observable.create((observer) => {
         socket.on("trainingStatus", (status) => {

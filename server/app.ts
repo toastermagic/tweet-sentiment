@@ -1,4 +1,4 @@
-/// <reference path="./typings/index.d.ts"/>
+/// <reference path="../typings/index.d.ts"/>
 
 "use strict";
 
@@ -83,7 +83,8 @@ function convertTweet(tweet: ITweet): Promise<TweetAnalysed> {
           res(casted);
         })
         .catch((err) => {
-          rej(err);
+          casted.output = err.code;
+          res(casted);
         });
     } else {
       res(casted);
@@ -150,7 +151,7 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
   socket.on("tweetRequest", (options, callback) => {
     console.log("tweetRequest");
 
-    db.getNextUnclassifiedTweet(options.tweetId).then((tweet: ITweet) => {
+    db.getNextUnclassifiedTweet(options.afterTweetId).then((tweet: ITweet) => {
       if (!tweet) {
         console.log("no new unclassified tweets to send");
         callback([]);

@@ -66,6 +66,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     margin: 0;
   }
 
+  #mainToolbar {
+    z-index: 400;
+  }
+
   #mainToolbar.tall .app-name {
     font-size: 40px;
     font-weight: 300;
@@ -97,12 +101,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     /* Required for main area's paper-scroll-header-panel custom condensing transformation */
     -webkit-transform-origin: left center;
     transform-origin: left center;
-  }
-
-  /* Height of the scroll area */
-  .content {
-    /*height: 900px;*/
-    height: 100%;
   }
 
   section[data-route="home"] paper-material {

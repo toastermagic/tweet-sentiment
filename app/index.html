@@ -72,25 +72,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- Main Area -->
     <paper-scroll-header-panel main id="headerPanelMain" scroll-away-topbar condenses>
       <!-- Main Toolbar -->
-      <paper-toolbar id="mainToolbar" class="tall">
+      <paper-toolbar id="mainToolbar">
+        <div class="app-name">NHS Tweet Sentiment Analysis</div>
+        <div>&nbsp;with Google Prediction API&nbsp;</div>
+        <img src="images\predictionApiLogo.png" style="height:40px" />
         <span class="space"></span>
-
-        <!-- Application name -->
-        <div class="middle middle-container">
-          <div class="app-name">NHS Tweet Sentiment Analysis</div>
-        </div>
-
-        <style include="iron-flex iron-flex-alignment"></style>
-        <!-- Application sub title -->
-        <div class="bottom bottom-container">
-          <div class="bottom-title">
-            <div class="layout horizontal middle">
-              <div style="height:60px; display: inline">with</div>
-              <img src="images\predictionApiLogo.png" style="height:60px; display: inline" />
-              <div style="height:60px; display: inline">Google Prediction API</div>
-            </div>
-          </div>
-        </div>
+        <tweet-toolbar id="tweetbar"></tweet-toolbar>
       </paper-toolbar>
 
       <!-- Main Content -->
@@ -99,8 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </paper-scroll-header-panel>
 
-
-    <paper-toast id="toast">
+    <paper-toast id="toast" style="z-index:9999">
       <span class="toast-hide-button" role="button" tabindex="0" onclick="app.$.toast.hide()">Ok</span>
     </paper-toast>
 

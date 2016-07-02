@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="my-tweet">
   <template>
-    <style include="iron-flex iron-flex-alignment">
+    <style is="custom-style" include="shared-styles">
       :host {
       }
       
@@ -195,6 +195,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this.fire('hidden', {
             tweetId: this.tweet.id_str
+          });
+        },
+
+        classify: function(e) {
+          this.fire('classified', {
+            tweetId: this.tweet.id_str,
+            //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
+            classification: e.currentTarget.id
           });
         },
 

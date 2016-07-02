@@ -112,7 +112,7 @@ export class Database {
             couch.get("training", "_design/trainingTweets/_view/unclassified", options)
                 .then((results) => {
                     if (results.data.rows.length === 0) {
-                        res(null);
+                        res([]);
                     } else {
                         res(results.data.rows[0].value.tweet);
                     }

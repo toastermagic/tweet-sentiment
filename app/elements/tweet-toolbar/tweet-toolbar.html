@@ -62,7 +62,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _changePredict: function(newPredictMode) {
         app.$.toast.text = "Setting server to " + (newPredictMode ? "predict" : "learn") + "mode";
         app.$.toast.show();
-        mySocket.sendCommand("apiMode", newPredictMode ? "predict" : "learn");
+        tweetSocket.sendCommand("apiMode", newPredictMode ? "predict" : "learn");
       },
       _changeSubscribe: function(newSubscribed) {
           if (newSubscribed) {
@@ -78,18 +78,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
       },
       ready: function() {
-        this.tweetStream = mySocket.tweetStream();
+        this.tweetStream = tweetSocket.tweetStream();
 
-        this.statusSubscription = mySocket.statusStream.subscribe((status) => {
+        this.statusSubscription = tweetSocket.statusStream.subscribe((status) => {
+          console.log('training status', status);
           this.training = status.training;
           this.statusMessage = status.message;
-
-          app.$.toast.text(this.statusMessage);
+          app.$.toast.text = this.statusMessage;
           app.$.toast.show();
         });
       },
       train: function() {
-        mySocket.sendCommand("train");
+        tweetSocket.sendCommand("train");
       }
     });
   })();

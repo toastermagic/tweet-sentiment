@@ -83,7 +83,7 @@ function convertTweet(tweet: ITweet): Promise<TweetAnalysed> {
           res(casted);
         })
         .catch((err) => {
-          casted.output = err.code;
+          casted.output = err.message;
           res(casted);
         });
     } else {

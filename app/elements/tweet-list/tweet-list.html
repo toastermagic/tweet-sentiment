@@ -74,51 +74,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-toolbar::shadow #topBar {
         padding: 0px;
       }
-      
+
+      .predicted {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
       .carousel {
-        height: 500px;
+        /*height: 400px;*/
         width: 100%;
       }
       
       div::shadow .carousel-cell {
-        width: 60%;
+        width: 40%;
         height: 500px;
-        border: 1px solid black;
       }
     </style>
-
-    <div class="layout vertical center">
-      <span style="width: 25%; margin: 10px;">
+<div class="layout vertical center">
+  <span style="width: 25%; margin: 10px;">
         <span hidden$="{{tweet.output}}" class="layout horizontal around-justified">
           <span class="layout vertical center">
             <paper-fab title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
-            <span>Irrelevant</span>
-      </span>
-      <span class="layout vertical center">
+            <span class$="{{isIrrelevant(output)}}">Irrelevant</span>
+  </span>
+  <span class="layout vertical center">
             <paper-fab title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
-            <span>Angry</span>
-      </span>
-      <span class="layout vertical center">
+            <span class$="{{isAngry(output)}}">Angry</span>
+  </span>
+  <span class="layout vertical center">
             <paper-fab title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="classify" raised></paper-fab>
-            <span>Neutral</span>
-      </span>
-      <span class="layout vertical center">
+            <span class$="{{isNeutral(output)}}">Neutral</span>
+  </span>
+  <span class="layout vertical center">
             <paper-fab title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
-            <span>Positive</span>
-      </span>
-      </span>
-      </span>
+            <span class$="{{isPositive(output)}}">Positive</span>
+  </span>
+  </span>
+  </span>
 
-
-      <div id="carousel" class="carousel">
-        <!--<template is="dom-repeat" items="{{tweets}}">
-          <my-tweet class="carousel-cell" id="tweet[[item.id_str]]" tweet="[[item]]"></my-tweet>
-        </template>-->
-      </div>
-
-      <paper-toolbar class="bottom" justify="end">
-        <div style="width:100%; height 3px; position: absolute">
-          <template id="progress" is="dom-if" if="{{training}}">
+  <div id="carousel" class="carousel">
+  </div>
+  <paper-toolbar class="bottom" justify="end">
+    <div style="width:100%; height 3px; position: absolute">
+      <template id="progress" is="dom-if" if="{{training}}">
             <paper-progress indeterminate></paper-progress>
           </template>
   </div>
@@ -130,7 +128,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-radio-button name="predict">Predict</paper-radio-button>
   </paper-radio-group>
   <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
-  <paper-button raised style="background:#0c0; margin-right:16px" on-tap="resize">resize</paper-button>
+  <paper-button raised style="background:#0c0; margin-right:16px" on-tap="movenext">next</paper-button>
   <paper-button raised style="background:#0c0; margin-right:16px" on-tap="add">add</paper-button>
   </paper-toolbar>
   </div>
@@ -155,6 +153,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: 'learn',
             observer: '_changeApiMode'
           },
+          output: {
+            type: Object,
+            notify: true
+          },
           flickity: Object,
           training: Boolean,
           statusMessage: String,
@@ -164,77 +166,127 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
 
+        isAngry: function(val) {
+          return val === "angry" ? "predicted" : ""; 
+        }, 
+        isNeutral: function(val) {
+          return val === "neutral" ? "predicted" : ""; 
+        },  
+        isPositive: function(val) {
+          return val === "positive" ? "predicted" : ""; 
+        },  
+        isIrrelevant: function(val) {
+          return val === "irrelevant" ? "predicted" : ""; 
+        },  
+
         listeners: {
           'hidden': '_hidden',
           'loaded': '_loaded'
         },
 
-        addTweet: function(tweet) {
+        makeTweetElement: function(tweet) {
           if (!tweet) {
             return;
           }
 
-          console.log('adding tweet', tweet.id_str);
+          console.log('adding tweet', tweet.tweet.id_str);
 
           let newTweet = document.createElement("my-tweet");
           newTweet.className += "carousel-cell";
-          newTweet.setAttribute("id", "tweet" + tweet.id_str);
-          
-          this.flickity.append(newTweet);
-          this.resize();
+          newTweet.setAttribute("id", "tweet" + tweet.tweet.id_str);
+          newTweet.tweet = tweet.tweet;
+          this.output = tweet.output;
 
-          newTweet.tweet = tweet;
+          return newTweet;
         },
 
         resize: function() {
           this.flickity.resize();
         },
 
-        add: function() {
-          app.socket.emit("tweetRequest", (tweet) => {
+        showTweet: function(tweet, withDispose) {
+          //  create the empty element
+          var currentCell = this.flickity.selectedCell;
+          let tweetCell = this.makeTweetElement(tweet);
+
+          this.flickity.append(tweetCell);
+          this.resize();
+
+          tweetCell
+            .fetchTweetAsync(tweet.tweet.id_str)
+            .then((result) => {
+              console.log('tweet loaded', result);
+              tweetCell.loading = false;
+              if (!result.tweetFrame) {
+                console.log('bad tweet', tweet.tweet.id_str);
+                app.socket.emit('badTweet', tweet.tweet.id_str);
+                this.movenext(tweet.tweet.id_str);
+                this.flickity.remove(tweetCell);
+                return;
+              }
+
+              if (withDispose) {
+                this.flickity.next();
+
+                //  old cell can be disposed of now
+                if (currentCell) {
+                  currentCell.element.hideAnimation();
+                }
+              }
+            });
+        },
+
+        movenext: function(currentTweetId) {
+          //  get a new tweet
+          app.socket.emit("tweetRequest", currentTweetId, (tweet) => {
             console.log('tweet request fulfilled', tweet.id_str);
-            this.addTweet(tweet);
+            this.showTweet(tweet, true);
+          });
+        },
+
+        add: function() {
+          app.socket.emit("tweetRequest", null, (tweet) => {
+            console.log('tweet request fulfilled', tweet);
+            this.showTweet(tweet);
           });
         },
 
         classify: function(e) {
-          let tweet = this.flickity.selectedElement;
+          let tweet = this.flickity.selectedCell;
           if (!tweet) {
             return;
           }
-
+          let tweetId = tweet.element.tweet.id_str;
           //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
-          console.log('classifying', tweet.tweet.id_str, 'as', e.currentTarget.id);
+          console.log('classifying', tweetId, 'as', e.currentTarget.id);
 
           app.socket.emit("classify", {
-            tweetId: tweet.tweet.id_str,
+            tweetId: tweetId,
             class: e.currentTarget.id
           }, (nextTweet) => {
-            this.addTweet(nextTweet);
+            this.showTweet(nextTweet, true);
           });
         },
 
         ready: function() {
-          var carousel = document.querySelector('#carousel');
+          this.$.carousel.style.height = "500px";
+
           this.flickity = new Flickity(this.$.carousel, {
             useSetGallerySize: false,
-            cellSelector: ".carousel-cell"
+            cellSelector: ".carousel-cell",
+            pageDots: true
           });
 
-          // app.socket.on("tweet", (tweet) => {
-          //   if (this.receiving) {
-          //     this.addTweet(tweet);
-          //   }
-
-          //   // while (this.tweets.length > 15) {
-          //   //   this.$$("#tweet" + this.tweets[0].id_str).selfDestruct();
-          //   // }
-          // });
+          app.socket.on("tweet", (tweet) => {
+            this.showTweet(tweet, false);
+          });
 
           app.socket.on("trainingStatus", (status) => {
             this.training = status.status === "RUNNING";
             this.statusMessage = status.message;
           });
+
+          // this.movenext();
         },
 
         train: function() {
@@ -242,11 +294,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         _hidden: function(e) {
-          let hiddenTweet = this.$$("#tweet" + e.detail.tweetId);
-          console.log('hidden, attempting to remove', e.detail.tweetId, hiddenTweet);
+          let tweetElementId = "#tweet" + e.detail.tweetId;
+          let hiddenTweet = this.$$(tweetElementId);
+          console.log('hidden, attempting to remove', tweetElementId, hiddenTweet);
           this.flickity.remove(hiddenTweet);
           this.resize();
-          this.flickity.next(false);
         },
 
         _loaded: function(e) {

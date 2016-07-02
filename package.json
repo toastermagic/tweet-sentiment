@@ -7,6 +7,7 @@
     "cookie-session": "1.2.0",
     "csurf": "1.8.3",
     "dependable": "0.2.5",
+    "es6-promise": "^3.2.1",
     "express": "^4.13.3",
     "express-winston": "0.4.1",
     "flickity": "^1.2.1",
@@ -55,7 +56,8 @@
   },
   "scripts": {
     "test": "gulp test:local",
-    "start": "gulp serve"
+    "start": "gulp serve",
+    "postinstall": "typings install && bower install"
   },
   "engines": {
     "node": ">=0.10.0"

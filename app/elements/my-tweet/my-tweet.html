@@ -19,22 +19,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       
       #buttonGroup {
-        border-radius: 5px;
+        border-radius: 5px 5px 5px 5px;
         background: rgba(200, 200, 200, 0.85);
         border-top: 1px 1px 0px 1px solid #333;
-        margin-top: 20px;
-        height: 100px;
+        width: 0px;
+        left: 220px;
         transition: all 1s;
         z-index: 2000;
         position: absolute;
         opacity:0;
-        top:0px;
       }
       
       #buttonGroup.hovered {
         opacity: 1;
-        height: 100px;
-        top: -100px;
+        width: unset;
       }
       
       .classified {
@@ -52,7 +50,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       
       paper-fab {
-        margin: 5px 10px 0 10px;
+        margin: 5px 5px 0 0;
       }
       
       #irrelevant {
@@ -80,7 +78,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         z-index: 3000;
         transform: scale(0.6, 0.6);
       }
-      
+      .smallText {
+        font-size: smaller;
+      }
       #tweetContainer.hovered {
         transform: scale(1.0, 1.0);
       }
@@ -88,24 +88,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="spinnerContainer" class="layout vertical center">
       <paper-spinner active="{{loading}}"></paper-spinner>
     </div>
+
     <div id="wrapper" class$="{{hovered}}">
       <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
-        <div id="buttonGroup" style="width:{{fullWidth}}px" class$="layout horizontal around-justify {{hovered}}">
-          <span class="layout vertical center">
-              <paper-fab mini title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
-              <span class$="{{isIrrelevant(output)}}">Irrelevant</span>
+        <div id="predicton" style="position:absolute; top: 0px; left: 0px; z-index: 5000">
+          <span hidden$="{{!isPositive}}">
+              <paper-fab mini  title="Positive" icon="thumb_up" id="positive" on-tap="dismiss" raised></paper-fab>
+              <!--<span class="smallText">Positive</span>-->
           </span>
+          <span hidden$="{{!isNeutral}}">
+              <paper-fab mini  title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="dismiss" raised></paper-fab>
+              <!--<span class="smallText">Neutral</span>-->
+          </span>
+          <span hidden$="{{!isAngry}}">
+              <paper-fab mini  title="Angry" icon="thumb_down" id="angry" on-tap="dismiss" raised></paper-fab>
+              <!--<span class="smallText">Angry</span>-->
+          </span>
+          <span hidden$="{{!isIrrelevant}}">
+              <paper-fab mini  title="Irrelevant" icon="delete" id="irrelevant" on-tap="dismiss" raised></paper-fab>
+              <!--<span class="smallText">Irrelevant</span>-->
+          </span>
+        </div>
+        <div id="buttonGroup" class$="layout vertical around-justify {{hovered}}">
           <span class="layout vertical center">
-              <paper-fab mini title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
-              <span class$="{{isAngry(output)}}">Angry</span>
+              <paper-fab mini title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
+              <span class="smallText">Positive</span>
           </span>
           <span class="layout vertical center">
               <paper-fab mini title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="classify" raised></paper-fab>
-              <span class$="{{isNeutral(output)}}">Neutral</span>
+              <span class="smallText">Neutral</span>
           </span>
           <span class="layout vertical center">
-              <paper-fab mini title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
-              <span class$="{{isPositive(output)}}">Positive</span>
+              <paper-fab mini title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
+              <span class="smallText">Angry</span>
+          </span>
+          <span class="layout vertical center">
+              <paper-fab mini title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
+              <span class="smallText">Irrelevant</span>
           </span>
         </div>
         <div id="tweetContainer" class$="{{classified}} {{hovered}}" hidden$="{{loading}}">
@@ -161,6 +180,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }]
               }
             }
+          },
+          isAngry: {
+            type: String,
+            computed: 'compareOutcome(output, "angry")'
+          },
+          isNeutral: {
+            type: String,
+            computed: 'compareOutcome(output, "neutral")'
+          },
+          isPositive: {
+            type: String,
+            computed: 'compareOutcome(output, "positive")'
+          },
+          isIrrelevant: {
+            type: String,
+            computed: 'compareOutcome(output, "irrelevant")'
           }
         },
 
@@ -170,6 +205,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         listeners: {
           'neon-animation-finish': '_onNeonAnimationFinish'
+        },
+
+        compareOutcome: function(output, label) {
+          return output == label;
         },
 
         onHovered: function() {
@@ -194,6 +233,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _onNeonAnimationFinish: function() {
           this.style.display = "none";
+        },
+
+        dismiss: function(e) {
+          this.onUnhovered();
+
+          setTimeout(() => {
+            this.fire('removeMe', {
+              tweetId: this.tweet.id_str
+            });
+          }, 250);
         },
 
         classify: function(e) {

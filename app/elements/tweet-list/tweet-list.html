@@ -14,7 +14,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="..\..\bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="..\..\bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="..\..\bower_components/paper-button/paper-button.html">
-<link rel="import" href="..\..\bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="..\..\bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="..\..\bower_components/paper-input/paper-input.html">
 
 <dom-module id="tweet-list">
   <template>
@@ -31,6 +32,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-radio-button-checked-color: #ccc;
         --paper-radio-button-unchecked-color: #ccc;
         --paper-radio-button-label-color: #ccc;
+      }
+      
+      paper-checkbox {
+        --paper-checkbox-checked-color: #ccc;
+        --paper-checkbox-unchecked-color: #ccc;
+        --paper-checkbox-label-color: #ccc;
       }
       
       paper-fab {
@@ -93,11 +100,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <span style="margin-left:16px">{{statusMessage}}</span>
         <span class="flex"></span>
-        <span style="color:#ccc">API Mode:</span>
-        <paper-radio-group disabled$="{{training}}" selected="{{apiMode}}">
-          <paper-radio-button name="learn">Learn</paper-radio-button>
-          <paper-radio-button name="predict">Predict</paper-radio-button>
-        </paper-radio-group>
+        <span>
+          <span>
+            <label for="subscribe" style="color:#ccc">Live:</label>
+            <paper-checkbox id="subscribe" checked="{{subscribed}}"></paper-checkbox>
+          </span>
+        </span>
+        <span>
+          <label for="predict" style="color:#ccc">Predict:</label>
+          <paper-checkbox id="predict" on-change="changePredictMode"></paper-checkbox>
+        <span>
         <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
         <paper-button raised style="background:#0c0; margin-right:16px" on-tap="shuffle">shuffle</paper-button>
         <paper-button raised style="background:#0c0; margin-right:16px" on-tap="add">add</paper-button>
@@ -110,7 +122,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       Polymer({
         is: 'tweet-list',
-
+        lastTweetId: String,
         properties: {
           tweets: {
             type: Array,
@@ -130,7 +142,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           packery: Object,
           training: Boolean,
           statusMessage: String,
-          tweetSubscription: Object
+          tweetSubscription: Object,
+          tweetPausable: Object,
+          subscribed: {
+            type: Boolean,
+            value: false,
+            observer: '_changeSubscribed'
+          }
         },
 
         isAngry: function(val) {
@@ -147,7 +165,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         listeners: {
-          'hidden': '_hidden',
+          'removeMe': '_removeMe',
           'loaded': '_loaded',
           'hovered': '_hovered',
           'unHovered': '_unHovered',
@@ -187,22 +205,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.tweetStack.appendChild(tweetCell);
           this.packery.appended(tweetCell);
           this.packery.layout();
-          this.packery.reloadItems();
 
           tweetCell
             .fetchTweetAsync(tweet.tweet.id_str)
             .then((result) => {
               console.log('tweet loaded', result);
-              if (!result.tweetFrame) {
-                console.log('bad tweet', tweet.tweet.id_str);
-                mySocket.sendCommand("badTweet", tweet.tweet.id_str);
-                this.movenext(tweet.tweet.id_str);
-                return;
-              }
-
-              if (withDispose) {
-                //  old cell can be disposed of now
-              }
+            })
+            .catch((err) => {
+              console.log('bad tweet', tweet.tweet.id_str, err);
+              this.packery.remove(tweetCell);
+              this.packery.layout();
+              mySocket.sendCommand("badTweet", tweet.tweet.id_str);
+              // this.add(tweet.tweet.id_str);
+              return;
             });
         },
 
@@ -225,10 +240,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         add: function() {
           //  get a new tweet
           mySocket
-            .requestTweets(null, 1)
+            .requestTweets(this.lastTweetId, 1)
             .take(1)
-            .subscribe((tweet) => {
-              this.showTweet(tweet);
+            .subscribe((tweets) => {
+              _(tweets).forEach((tweet) => {
+                this.showTweet(tweet)
+                this.lastTweetId = tweet.tweet.id_str;
+              });
             });
         },
 
@@ -244,24 +262,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             gutter: 10
           });
 
-          this.tweetSubscription = mySocket.tweetStream.subscribe((tweet) => {
-            this.showTweet(tweet, false);
-          });
-
           this.statusSubscription = mySocket.statusStream.subscribe((status) => {
             this.training = status.training;
             this.statusMessage = status.message;
           });
         },
 
+        _changeSubscribed: function(newSubscribed) {
+          if (newSubscribed) {
+            if (!this.tweetSubscription) {
+              console.log('creating new subscription')
+              
+              this.tweetPausable = mySocket.tweetStream().pausable();
+              this.tweetSubscription = this.tweetPausable.subscribeOnNext((tweet) => {
+                if (this.packery.items.length < 30) {
+                  this.showTweet(tweet, false);
+                }
+              });
+            } 
+
+            console.log('resuming tweet subscription')
+            this.tweetPausable.resume();
+          } else {
+            if (this.tweetSubscription) {
+              console.log('pausing tweet subscription')
+              this.tweetPausable.pause();
+            }
+          }
+        },
+
         train: function() {
           mySocket.sendCommand("train");
         },
 
-        _hidden: function(e) {
-          let tweetElementId = "#tweet" + e.detail.tweetId;
-          let hiddenTweet = this.$$(tweetElementId);
-          console.log('hidden, ready to remove', tweetElementId, hiddenTweet);
+        changePredictMode: function() {
+          if (this.apiMode == "learn") {
+            this.apiMode = "predict";
+          } else {
+            this.apiMode = "learn";
+          }
+        },
+        
+        _removeMe: function(e) {
+          console.log('hidden, ready to remove', e.target);
+          this.packery.remove(e.target);
+          this.packery.layout();
         },
 
         _loaded: function(e) {

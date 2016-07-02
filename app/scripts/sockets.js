@@ -27,10 +27,10 @@ var mySocket = {
                 });
         });
     },
-    classifyTweet: (tweetId, classification) => {
+    classifyTweet: (options) => {
         socket.emit("classify", {
-            tweetId: tweetId,
-            class: classification
+            tweetId: options.tweetId,
+            class: options.classification
         });
     },
     sendCommand: (commandName, options) => {

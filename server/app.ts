@@ -101,16 +101,9 @@ function getTimeOfDay(tweet: any): String {
 mySocket.on("connection", (socket: SocketIO.Socket) => {
   console.log("user connected", socket.id);
 
-  socket.on("classify", (tweet, callback) => {
-    console.log("classify", tweet.tweetId, tweet.class);
-
-    db
-      .updateTweet(tweet.tweetId, tweet.class)
-      .then(() => {
-        db.getNextUnclassifiedTweet(tweet.tweetId).then((nextTweet) => {
-          callback(nextTweet);
-        });
-      });;
+  socket.on("classify", (options) => {
+    console.log("classify", options.tweetId, options.class);
+    db.updateTweet(options.tweetId, options.class);
   });
 
   socket.on("train", () => {
@@ -158,6 +151,12 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
     console.log("tweetRequest");
 
     db.getNextUnclassifiedTweet(options.tweetId).then((tweet: ITweet) => {
+      if (!tweet) {
+        console.log("no new unclassified tweets to send");
+        callback([]);
+        return;
+      }
+
       console.log("sending", tweet.id_str);
       convertTweet(tweet)
         .then((newTweet) => callback([newTweet]));

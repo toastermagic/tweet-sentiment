@@ -23,11 +23,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
       
-      my-tweet {
-        margin: 15px;
-        transition: all 150ms ease-in-out;
+      .hovered {
+        z-index: 500;
       }
-      
+
       paper-radio-button {
         --paper-radio-button-checked-color: #ccc;
         --paper-radio-button-unchecked-color: #ccc;
@@ -79,39 +78,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: bold;
         text-decoration: underline;
       }
-      
-      .carousel {
-        /*height: 400px;*/
-        width: 100%;
-      }
-      
-      div::shadow .carousel-cell {
-        width: 40%;
-        height: 500px;
-      }
     </style>
     <div class="layout vertical center">
-      <span style="width: 25%; margin: 10px;">
-        <span hidden$="{{tweet.output}}" class="layout horizontal around-justified">
-          <span class="layout vertical center">
-            <paper-fab title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
-            <span class$="{{isIrrelevant(output)}}">Irrelevant</span>
-          </span>
-          <span class="layout vertical center">
-            <paper-fab title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
-            <span class$="{{isAngry(output)}}">Angry</span>
-          </span>
-          <span class="layout vertical center">
-            <paper-fab title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="classify" raised></paper-fab>
-            <span class$="{{isNeutral(output)}}">Neutral</span>
-          </span>
-          <span class="layout vertical center">
-            <paper-fab title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
-            <span class$="{{isPositive(output)}}">Positive</span>
-          </span>
-        </span>
-      </span>
-      <div id="carousel" class="carousel">
+      <div class="flex" style="width:100%">
+        <div id="tweetStack" style="width:100%; height:100%; border: 1px solid black">
+        </div>
       </div>
       <paper-toolbar class="bottom" justify="end">
         <div style="width:100%; height 3px; position: absolute">
@@ -155,9 +126,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             notify: true
           },
-          flickity: Object,
+          packery: Object,
           training: Boolean,
-          statusMessage: String
+          statusMessage: String,
+          tweetSubscription: Object
         },
 
         isAngry: function(val) {
@@ -175,7 +147,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         listeners: {
           'hidden': '_hidden',
-          'loaded': '_loaded'
+          'loaded': '_loaded',
+          'hovered': '_hovered',
+          'unHovered': '_unHovered'
+        },
+
+        _hovered: function(e) {
+          e.target.style.zIndex = 500;
+        },
+
+        _unHovered: function(e) {
+          e.target.style.zIndex = e.target.zIndex;
         },
 
         makeTweetElement: function(tweet) {
@@ -186,25 +168,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.log('adding tweet', tweet.tweet.id_str);
 
           let newTweet = document.createElement("my-tweet");
-          newTweet.className += "carousel-cell";
+          newTweet.className += "grid-cell";
           newTweet.setAttribute("id", "tweet" + tweet.tweet.id_str);
           newTweet.tweet = tweet.tweet;
-          this.output = tweet.output;
-
+          newTweet.output = tweet.output;
+          newTweet.style.zIndex = tweet.zIndex;
           return newTweet;
-        },
-
-        resize: function() {
-          this.flickity.resize();
         },
 
         showTweet: function(tweet, withDispose) {
           //  create the empty element
-          var currentCell = this.flickity.selectedCell;
           let tweetCell = this.makeTweetElement(tweet);
 
-          this.flickity.append(tweetCell);
-          this.resize();
+          this.$.tweetStack.appendChild(tweetCell);
+          this.packery.appended(tweetCell);
+          this.packery.layout();
+          this.packery.reloadItems();
 
           tweetCell
             .fetchTweetAsync(tweet.tweet.id_str)
@@ -212,101 +191,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               console.log('tweet loaded', result);
               if (!result.tweetFrame) {
                 console.log('bad tweet', tweet.tweet.id_str);
-                app.socket.emit('badTweet', tweet.tweet.id_str);
+                mySocket.sendCommand("badTweet", tweet.tweet.id_str);
                 this.movenext(tweet.tweet.id_str);
-                this.flickity.remove(tweetCell);
                 return;
               }
 
               if (withDispose) {
-                this.flickity.next();
-
                 //  old cell can be disposed of now
-                if (currentCell) {
-                  currentCell.element.hideAnimation();
-                }
               }
             });
         },
 
         movenext: function(currentTweetId) {
           //  get a new tweet
-          app.socket.emit("tweetRequest", currentTweetId, (tweet) => {
-            console.log('tweet request fulfilled', tweet.id_str);
-            this.showTweet(tweet, true);
-          });
+          mySocket
+            .requestTweets(currentTweetId, 1)
+            .take(1)
+            .subscribe((tweet) => {
+              this.showTweet(tweet, true);
+            });
         },
 
         add: function() {
-          app.socket.emit("tweetRequest", null, (tweet) => {
-            console.log('tweet request fulfilled', tweet);
-            this.showTweet(tweet);
-          });
+          //  get a new tweet
+          mySocket
+            .requestTweets(null, 1)
+            .take(1)
+            .subscribe((tweet) => {
+              this.showTweet(tweet);
+            });
         },
 
         classify: function(e) {
-          let tweet = this.flickity.selectedCell;
           if (!tweet) {
             return;
           }
           let tweetId = tweet.element.tweet.id_str;
           //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
           console.log('classifying', tweetId, 'as', e.currentTarget.id);
-
-          app.socket.emit("classify", {
-            tweetId: tweetId,
-            class: e.currentTarget.id
-          }, (nextTweet) => {
-            this.showTweet(nextTweet, true);
-          });
+          mySocket.classifyTweet(tweetId, e.currentTarget.id);
         },
 
         ready: function() {
-          this.$.carousel.style.height = "500px";
-
-          this.flickity = new Flickity(this.$.carousel, {
-            useSetGallerySize: false,
-            cellSelector: ".carousel-cell",
-            pageDots: true
+          var elem = this.$.tweetStack;
+          this.packery = new Packery(elem, {
+            itemSelector: '.grid-cell',
+            gutter: 10
           });
 
-          app.socket.on("tweet", (tweet) => {
+          this.tweetSubscription = mySocket.tweetStream.subscribe((tweet) => {
             this.showTweet(tweet, false);
           });
 
-          app.socket.on("trainingStatus", (status) => {
-            this.training = status.status === "RUNNING";
+          this.statusSubscription = mySocket.statusStream.subscribe((status) => {
+            this.training = status.training;
             this.statusMessage = status.message;
           });
-
-          // this.movenext();
         },
 
         train: function() {
-          app.socket.emit("train");
+          mySocket.sendCommand("train");
         },
 
         _hidden: function(e) {
           let tweetElementId = "#tweet" + e.detail.tweetId;
           let hiddenTweet = this.$$(tweetElementId);
-          console.log('hidden, attempting to remove', tweetElementId, hiddenTweet);
-          this.flickity.remove(hiddenTweet);
-          this.resize();
+          console.log('hidden, ready to remove', tweetElementId, hiddenTweet);
         },
 
         _loaded: function(e) {
           console.log("loaded", e.detail)
-          let tweet = this.flickity.selectedElement;
-
-          if (this.flickity.cells.length > 1) {
-            this.flickity.cells[0].element.hideAnimation();
-          }
-
-          this.resize();
         },
 
         _changeApiMode: function(newMode) {
-          app.socket.emit("apiMode", newMode);
+          mySocket.sendCommand("apiMode", newMode);
         }
       });
     })();

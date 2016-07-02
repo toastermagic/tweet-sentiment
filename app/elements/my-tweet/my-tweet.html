@@ -16,18 +16,101 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style include="iron-flex iron-flex-alignment">
       :host {
-        display: block;
       }
       
-      paper-spinner {
+      #buttonGroup {
+        border-radius: 5px;
+        background: rgba(200, 200, 200, 0.85);
+        border-top: 1px 1px 0px 1px solid #333;
+        margin-top: 20px;
+        height: 100px;
+        transition: all 1s;
+        z-index: 2000;
+        position: absolute;
+        opacity:0;
+        top:0px;
+      }
+      
+      #buttonGroup.hovered {
+        opacity: 1;
+        height: 100px;
+        top: -100px;
+      }
+      
+      .classified {
+        -webkit-filter: grayscale(100%);
+        filter: grayscale(100%);
+      }
+      
+      .hoverWrapper {
         position: relative;
+      }
+
+      paper-spinner {
+        position: absolute;
         top: 100px;
+      }
+      
+      paper-fab {
+        margin: 5px 10px 0 10px;
+      }
+      
+      #irrelevant {
+        background: rgba(255, 255, 255, 0.5);
+        color: #333;
+      }
+      
+      #angry {
+        background: rgba(255, 0, 0, 0.5);
+      }
+      
+      #neutral {
+        background: rgba(0, 0, 255, 0.5);
+      }
+      
+      #positive {
+        background: rgba(0, 255, 0, 0.5);
+      }
+      
+      #tweetContainer {
+        -webkit-transition: transform 0.2s;
+        -moz-transition: transform 0.2s;
+        transition: transform 0.2s;
+        transform-origin: 0 0;
+        z-index: 3000;
+        transform: scale(0.6, 0.6);
+      }
+      
+      #tweetContainer.hovered {
+        transform: scale(1.0, 1.0);
       }
     </style>
     <div id="spinnerContainer" class="layout vertical center">
       <paper-spinner active="{{loading}}"></paper-spinner>
     </div>
-    <div id="tweetContainer" hidden$="{{loading}}" class="layout vertical center">
+    <div id="wrapper" class$="{{classified}} {{hovered}}">
+      <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
+        <div id="buttonGroup" style="width:{{fullWidth}}px" class$="layout horizontal around-justify {{hovered}}">
+          <span class="layout vertical center">
+              <paper-fab mini title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
+              <span class$="{{isIrrelevant(output)}}">Irrelevant</span>
+          </span>
+          <span class="layout vertical center">
+              <paper-fab mini title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
+              <span class$="{{isAngry(output)}}">Angry</span>
+          </span>
+          <span class="layout vertical center">
+              <paper-fab mini title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="classify" raised></paper-fab>
+              <span class$="{{isNeutral(output)}}">Neutral</span>
+          </span>
+          <span class="layout vertical center">
+              <paper-fab mini title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
+              <span class$="{{isPositive(output)}}">Positive</span>
+          </span>
+        </div>
+        <div id="tweetContainer" class$="{{hovered}}" hidden$="{{loading}}">
+        </div>
+      </div>
     </div>
   </template>
   <script>
@@ -36,11 +119,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       Polymer({
         is: 'my-tweet',
-
         properties: {
+          fullWidth: {
+            type: Number,
+            value: 250
+          },
+          zIndex: {
+            type: Number,
+            value: function() {
+              return Math.floor(Math.random() * 290) + 10;
+            }
+          },
+          hovered: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
           tweet: {
             type: Object
           },
+          classified: Boolean,
+          output: Object,
           loading: {
             type: Boolean,
             notify: true,
@@ -73,6 +172,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'neon-animation-finish': '_onNeonAnimationFinish'
         },
 
+        onHovered: function() {
+          this.hovered = "hovered";
+          this.fire('hovered');
+        },
+
+        onUnhovered: function() {
+          this.fire('unHovered');
+          this.hovered = "";
+        },
+
+        ready: function() {
+          this.$.wrapper.style.width = (this.fullWidth / 2) + "px";
+        },
+
         hideAnimation: function() {
           this.playAnimation('exit');
         },
@@ -91,7 +204,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             TwitterWidgetsLoader.load((twttr) => {
               twttr.widgets.createTweet(tweetId,
                 this.$.tweetContainer, {
-                  width: "300"
+                  width: this.fullWidth
                 }).then((result, err) => {
 
                 this.loading = false;
@@ -99,6 +212,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 if (err) {
                   rej(err);
                 }
+
+                this.fullWidth = result.width;
+
                 res({
                   tweetId: tweetId,
                   tweetFrame: result

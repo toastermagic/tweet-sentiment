@@ -15,6 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <meta charset="utf-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta  name="twitter:widgets:autoload" content="off">
   <title>Tweet Analysis with Google Prediction API</title>
 
   <!-- Place favicon.ico in the `app/` directory -->
@@ -44,15 +45,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <!-- build:css styles/main.css -->
   <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/flickity.css" media="screen">
   <!-- endbuild-->
 
   <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="bower_components/rxjs/dist/rx.js"></script>
+  <script src="bower_components/packery/dist/packery.pkgd.js"></script>
   <!-- endbuild -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="/scripts/twitter-widgets.js"></script>
-  <script src="/scripts/flickity.pkgd.js"></script>
+  <script src="/scripts/sockets.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <!-- Because this project uses vulcanize this should be your only html import
@@ -64,14 +66,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 
 <body unresolved>
-  <!-- build:remove -->
-  <span id="browser-sync-binding"></span>
-  <!-- endbuild -->
-
   <template is="dom-bind" id="app">
 
     <!-- Main Area -->
-    <paper-scroll-header-panel main id="headerPanelMain" condenses keep-condensed-header>
+    <paper-scroll-header-panel main id="headerPanelMain" scroll-away-topbar condenses keep-condensed-header>
       <!-- Main Toolbar -->
       <paper-toolbar id="mainToolbar" class="tall">
         <span class="space"></span>

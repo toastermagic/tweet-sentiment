@@ -56,21 +56,46 @@ function pollStatus() {
           message: `Training in progress(${elapsed} seconds)`,
           status: status.trainingStatus
         });
-        setTimeout(() => { pollStatus(); }, 5000);
+        setTimeout(() => { pollStatus(); }, 1000);
 
         return;
       }
 
       mySocket.emit("trainingStatus", {
-        message: `Training complete(${elapsed} seconds)`,
+        message: `Training complete - ${status.trainingStatus} (${elapsed} seconds)`,
         status: status.trainingStatus
       });
     });
 }
 
-function getTimeOfDay(tweet: ITweet) : String {
-  let myDate: Date = new Date(tweet.created_at.toString());
-  return myDate.getHours() + "." + myDate.getMinutes();
+function convertTweet(tweet: ITweet): Promise<TweetAnalysed> {
+  let casted: TweetAnalysed = new TweetAnalysed(tweet);
+
+  return new Promise((res, rej) => {
+    if (apiMode === "predict") {
+      predictor.predict("tweetSentiment", { "csvInstance": [tweet.text] })
+        .then((result: any) => {
+          let analysis = result[0];
+
+          casted.output = analysis.outputLabel;
+          casted.output_multi = analysis.outputMulti;
+
+          res(casted);
+        })
+        .catch((err) => {
+          rej(err);
+        });
+    } else {
+      res(casted);
+    }
+  });
+}
+
+function getTimeOfDay(tweet: any): String {
+  let myDate: Date = new Date(tweet.tweet.created_at.toString());
+  let hours: String = "0" + myDate.getHours();
+  let minutes: String = "0" + myDate.getMinutes();
+  return hours.substr(hours.length - 2) + ":" + minutes.substr(minutes.length - 2);
 }
 
 mySocket.on("connection", (socket: SocketIO.Socket) => {
@@ -91,12 +116,15 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
   socket.on("train", () => {
     console.log("training");
 
-    db.getTweets().then((tweets: ITweet[]) => {
+    db.getTweets().then((tweets: any[]) => {
       let instances = [];
       for (var index = 0; index < tweets.length; index++) {
         let trainingInstance = {
-          "csvInstance": [tweets[index].text, getTimeOfDay(tweets[index]), tweets[index].geo],
-          "output": tweets[index]
+          "csvInstance": [tweets[index].tweet.text,
+            getTimeOfDay(tweets[index]),
+            JSON.stringify(tweets[index].tweet.geo),
+            tweets[index].tweet.user.screen_name],
+          "output": tweets[index].classification
         };
         instances.push(trainingInstance);
       }
@@ -121,12 +149,18 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
     });
   });
 
-  socket.on("tweetRequest", (callback) => {
+  socket.on("badTweet", (tweetId) => {
+    console.log("badTweet", tweetId);
+    db.deleteTweet(tweetId);
+  });
+
+  socket.on("tweetRequest", (tweetId, callback) => {
     console.log("tweetRequest");
 
-    db.getNextUnclassifiedTweet().then((tweet: ITweet) => {
+    db.getNextUnclassifiedTweet(tweetId).then((tweet: ITweet) => {
       console.log("sending", tweet.id_str);
-      callback(tweet);
+      convertTweet(tweet)
+        .then((newTweet) => callback(newTweet));
     });
   });
 
@@ -149,20 +183,6 @@ tweetWatcher.on("tweet", (tweet: ITweet) => {
   console.log(new Date(), tweet.text);
   db.storeTweet(tweet);
 
-  if (apiMode === "predict") {
-
-    predictor.predict("tweetSentiment", { "csvInstance": [tweet.text] })
-      .then((result: any) => {
-        let analysis = result[0];
-        let casted: TweetAnalysed = new TweetAnalysed(tweet);
-
-        casted.output = analysis.outputLabel;
-        casted.output_multi = analysis.outputMulti;
-
-        mySocket.emit("tweet", casted);
-      })
-      .catch((err) => { console.log("prediction error", err); });
-  } else {
-    mySocket.emit("tweet", tweet);
-  }
+  convertTweet(tweet)
+    .then((newTweet) => mySocket.emit("tweet", newTweet));
 });

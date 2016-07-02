@@ -91,7 +91,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div id="wrapper" class$="{{hovered}}">
       <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
-        <div id="predicton" style="position:absolute; top: 0px; left: 0px; z-index: 5000">
+        <div id="predicton" hidden$="{{noOutput}}" style="position:absolute; top: 0px; left: 0px; z-index: 5000">
           <span hidden$="{{!isPositive}}">
               <paper-fab mini  title="Positive" icon="thumb_up" id="positive" on-tap="dismiss" raised></paper-fab>
               <!--<span class="smallText">Positive</span>-->
@@ -158,7 +158,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object
           },
           classified: String,
-          output: Object,
+          output: {
+            type: Object,
+            notify: true,
+            value: null
+          },
           loading: {
             type: Boolean,
             notify: true,
@@ -182,20 +186,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           },
           isAngry: {
-            type: String,
+            type: Boolean,
             computed: 'compareOutcome(output, "angry")'
           },
           isNeutral: {
-            type: String,
+            type: Boolean,
             computed: 'compareOutcome(output, "neutral")'
           },
           isPositive: {
-            type: String,
+            type: Boolean,
             computed: 'compareOutcome(output, "positive")'
           },
           isIrrelevant: {
-            type: String,
+            type: Boolean,
             computed: 'compareOutcome(output, "irrelevant")'
+          },
+          noOutput: {
+            type: Boolean,
+            computed: 'noOutput(output)'
           }
         },
 
@@ -209,6 +217,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         compareOutcome: function(output, label) {
           return output == label;
+        },
+
+        noOutput: function(output) {
+          return output === null;
         },
 
         onHovered: function() {

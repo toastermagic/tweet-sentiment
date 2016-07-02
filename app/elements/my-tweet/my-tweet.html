@@ -88,7 +88,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="spinnerContainer" class="layout vertical center">
       <paper-spinner active="{{loading}}"></paper-spinner>
     </div>
-    <div id="wrapper" class$="{{classified}} {{hovered}}">
+    <div id="wrapper" class$="{{hovered}}">
       <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
         <div id="buttonGroup" style="width:{{fullWidth}}px" class$="layout horizontal around-justify {{hovered}}">
           <span class="layout vertical center">
@@ -108,7 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <span class$="{{isPositive(output)}}">Positive</span>
           </span>
         </div>
-        <div id="tweetContainer" class$="{{hovered}}" hidden$="{{loading}}">
+        <div id="tweetContainer" class$="{{classified}} {{hovered}}" hidden$="{{loading}}">
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           tweet: {
             type: Object
           },
-          classified: Boolean,
+          classified: String,
           output: Object,
           loading: {
             type: Boolean,
@@ -173,8 +173,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         onHovered: function() {
-          this.hovered = "hovered";
-          this.fire('hovered');
+          if (!this.classified) {
+            this.hovered = "hovered";
+            this.fire('hovered');
+          }
         },
 
         onUnhovered: function() {
@@ -192,18 +194,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _onNeonAnimationFinish: function() {
           this.style.display = "none";
-
-          this.fire('hidden', {
-            tweetId: this.tweet.id_str
-          });
         },
 
         classify: function(e) {
+          this.classified = "classified";
+          this.onUnhovered();
+
           this.fire('classified', {
             tweetId: this.tweet.id_str,
             //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
             classification: e.currentTarget.id
           });
+
+          setTimeout(() => {
+            this.fire('removeMe', {
+              tweetId: this.tweet.id_str
+            });
+          }, 1000);
         },
 
         fetchTweetAsync: function(tweetId) {
@@ -217,11 +224,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 this.loading = false;
 
-                if (err) {
-                  rej(err);
+                if (err || !result) {
+                  rej(err || "Bad tweet");
                 }
-
-                this.fullWidth = result.width;
 
                 res({
                   tweetId: tweetId,

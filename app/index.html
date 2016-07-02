@@ -49,8 +49,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <script src="bower_components/rxjs/dist/rx.js"></script>
+  <script src="bower_components/rxjs/dist/rx.all.js"></script>
   <script src="bower_components/packery/dist/packery.pkgd.js"></script>
+  <script src="bower_components/underscore/underscore-min.js"></script>
   <!-- endbuild -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="/scripts/twitter-widgets.js"></script>
@@ -69,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template is="dom-bind" id="app">
 
     <!-- Main Area -->
-    <paper-scroll-header-panel main id="headerPanelMain" scroll-away-topbar condenses keep-condensed-header>
+    <paper-scroll-header-panel main id="headerPanelMain" scroll-away-topbar condenses>
       <!-- Main Toolbar -->
       <paper-toolbar id="mainToolbar" class="tall">
         <span class="space"></span>

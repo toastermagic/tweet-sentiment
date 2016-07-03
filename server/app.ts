@@ -10,6 +10,7 @@ import * as socketIo from "socket.io";
 
 let config = new Config();
 let PROD = process.env.NODE_ENV === "production";
+let PORT = process.env.PORT || 8000;
 
 //  initialize IOC container
 let container = require("./container");
@@ -38,6 +39,7 @@ if (PROD) {
 console.log("serving static files from " + staticPath);
 app.use(express.static(staticPath, { maxAge: "1d" }));
 
+console.log("listening on port " + PORT);
 server.listen(7654);
 
 tweetWatcher.track("nhs");

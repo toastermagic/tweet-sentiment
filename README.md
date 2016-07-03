@@ -1,6 +1,6 @@
 # Simple Sentiment Analysis
 
-> Using Google's Cloud Prediction API <img src="app/images/predictionApiLogo.png" style="position:relative; top:8px; width:25px; height:25px"/> 
+> Using Google's Cloud Prediction API <img src="app/images/predictionApiLogo_small.png"/> 
 > to classify comments on Twitter
 
 ## This Project Uses:

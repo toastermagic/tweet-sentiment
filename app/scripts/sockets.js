@@ -1,6 +1,7 @@
 window.tweetSocket = (function (document) {
     "use strict";
     var socket = io();
+    var countStream = Rx.Observable.create();
     var mySocket = {
         tweetStream: function () {
             var streamSource = Rx.Observable.create(function (observer) {
@@ -16,6 +17,11 @@ window.tweetSocket = (function (document) {
                     training: status.status === "RUNNING",
                     message: status.message
                 });
+            });
+        }),
+        countStream: Rx.Observable.create(function (observer) {
+            socket.on("counts", function (counts) {
+                observer.onNext(counts);
             });
         }),
         requestTweets: function (afterTweetId, limit) {

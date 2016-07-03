@@ -20,6 +20,14 @@ http://polymer.github.io/PATENTS.txt
 
   app.showProgress = false;
 
+  app.shuffle = function() {
+    app.$.tweetList._shuffle();
+  };
+
+  app.add = function() {
+    app.$.tweetList._add();
+  };
+
   // Sets app default base URL
   app.baseUrl = '/';
   if (window.location.port === '') {  // if production

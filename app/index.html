@@ -90,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- Main Area -->
     <paper-scroll-header-panel main id="headerPanelMain" scroll-away-topbar condenses>
       <!-- Main Toolbar -->
-      <paper-toolbar id="mainToolbar">
+      <paper-toolbar id="mainToolbar" on-shuffle="shuffle" on-add="add">
         <div class="app-name">Tweet Sentiment Analysis</div>
         <div>&nbsp;with Google Prediction API&nbsp;</div>
         <img src="images\predictionApiLogo.png" style="height:40px" />
@@ -100,7 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <!-- Main Content -->
       <div class="content layout vertical" style="position:relative">
-        <tweet-list class="layout flex"></tweet-list>
+        <tweet-list id="tweetList" class="layout flex"></tweet-list>
       </div>
     </paper-scroll-header-panel>
 

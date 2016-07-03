@@ -24,6 +24,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-checkbox-label-color: #ccc;
       }
 
+      paper-fab {
+        margin-left: 5px;
+      }
+
       .count-box {
         border: 3px solid #ccc;
         border-radius: 5px;
@@ -31,7 +35,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <paper-fab mini title="refresh counts" icon="tweet-icons:refresh" on-tap="refresh"></paper-fab>
+    <paper-fab id="shuffle" mini title="shuffle" raised icon="tweet-icons:shuffle" on-tap="shuffle"></paper-fab>
+    <paper-fab id="add" mini title="get old tweet" raised icon="tweet-icons:add" on-tap="add"></paper-fab>
+    <paper-fab id="refresh" mini title="refresh counts" icon="tweet-icons:refresh" on-tap="refresh"></paper-fab>
 
     <span class="layout horizontal">
       <paper-button raised title="unclassified" class="count-box">
@@ -129,9 +135,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         this.subscribeMode = true;
+        this.refresh();
       },
       refresh: function() {
         tweetSocket.sendCommand("counts");
+      },
+      shuffle: function() {
+        this.fire('shuffle');
+      },
+      add: function() {
+        this.fire('add');
       },
       train: function() {
         tweetSocket.sendCommand("train");

@@ -81,16 +81,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-decoration: underline;
       }
     </style>
-    <div class="layout horizontal end">
-      <span class="flex"></span>
-      <paper-fab title="shuffle" raised icon="tweet-icons:shuffle" on-tap="shuffle">shuffle</paper-fab>
-      <paper-fab title="find old" raised icon="tweet-icons:add" on-tap="add">add</paper-fab>
-    </div>
 
     <div class="layout horizontal center">
       <div class="flex" id="tweetStack">
       </div>
     </div>
+
   </template>
   <script>
     (function() {
@@ -121,7 +117,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'loaded': '_loaded',
           'hovered': '_hovered',
           'unHovered': '_unHovered',
-          'classified': '_classified'
+          'classified': '_classified',
+          'add': '_add',
+          'shuffle': '_shuffle'
         },
 
         _hovered: function(e) {
@@ -173,7 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
         },
 
-        shuffle: function(currentTweetId) {
+        _shuffle: function(currentTweetId) {
             var shufflers = [];
             var nonShufflers = [];
             for ( var i=0, len = this.packery.items.length; i < len; i++ ) {
@@ -189,7 +187,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.packery.layout();
         },
 
-        add: function() {
+        _add: function() {
           //  get a new tweet
           tweetSocket
             .requestTweets(this.lastTweetId, 1)

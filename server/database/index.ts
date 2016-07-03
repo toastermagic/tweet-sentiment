@@ -87,10 +87,29 @@ export class Database {
 
     getTweets() {
         return new Promise((res, rej) => {
-            couch.get("training", "_design/trainingTweets/_view/by_classification")
+            couch.get("training", "_design/trainingTweets/_view/classified")
                 .then((results) => {
                     var tweets = results.data.rows.map((row) => row.value);
                     res(tweets);
+                },
+                (err) => {
+                    rej(err);
+                });
+        });
+    }
+
+    getClassificationCounts() {
+        return new Promise((res, rej) => {
+            couch.get("training", "_design/trainingTweets/_view/count_by_classification", {
+                reduce: true,
+                group_level: 999
+            })
+                .then((results) => {
+                    let count = new Object;
+                    results.data.rows.map((row) => {
+                        count[row.key  || "unclassified"] = row.value;
+                    });
+                    res(count);
                 },
                 (err) => {
                     rej(err);

@@ -40,7 +40,13 @@ console.log("serving static files from " + staticPath);
 app.use(express.static(staticPath, { maxAge: "1d" }));
 
 console.log("listening on port " + PORT);
-server.listen(7654);
+server.listen(PORT, function (err) {
+  if (err) {
+    console.log("express couldn't start", err);
+    return;
+  }
+  console.log("express listening on port " + PORT);
+});
 
 tweetWatcher.track("nhs");
 

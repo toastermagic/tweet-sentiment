@@ -9,15 +9,20 @@
     },
     "filesGlob": [
         "./**/*.ts",
-        "!./node_modules/**/*.ts"
+        "!./node_modules/**/*.ts",
+        "!./app/bower_components/**/*.ts",
+        "!./typings/**/*.ts"
     ],
     "files": [
         "./server/app.ts",
-        "./server/config/index.ts",
         "./server/cloudprediction/index.ts",
-        "./server/twitterwatcher/index.ts",
+        "./server/config/index.ts",
         "./server/container/index.ts",
         "./server/database/index.ts",
-        "./typings/index.d.ts"
+        "./server/twitterwatcher/index.ts",
+        "./server/twitterwatcher/ITweet.ts",
+        "./server/twitterwatcher/ITweetAnalysed.ts",
+        "./server/twitterwatcher/ITwitterConfig.ts",
+        "./server/twitterwatcher/TwitterWatcher.ts"
     ]
 }

@@ -13,7 +13,6 @@
     "flickity": "^1.2.1",
     "gcloud": "0.23.0",
     "googleapis": "2.1.5",
-    "gulp-typescript": "^2.13.6",
     "material-design-icons": "^2.2.3",
     "node-couchdb": "^1.1.0",
     "node-uuid": "1.4.3",

@@ -70,8 +70,9 @@ get these keys from https://dev.twitter.com/
 
 ## This Project Uses:
 
-* [Polymer](https://www.polymer-project.org/), [Paper](https://elements.polymer-project.org/browse?package=paper-elements), [Iron](https://elements.polymer-project.org/browse?package=iron-elements) and [Neon](https://elements.polymer-project.org/browse?package=neon-elements) elements
 * [Google Cloud Prediction](https://cloud.google.com/prediction/)
 * [twitter](https://www.npmjs.com/package/twitter)
 * [twitter-widgets](https://dev.twitter.com/web/embedded-tweets)
 * [couchDB](http://couchdb.apache.org/)
+* [Polymer](https://www.polymer-project.org/), [Paper](https://elements.polymer-project.org/browse?package=paper-elements), [Iron](https://elements.polymer-project.org/browse?package=iron-elements) and [Neon](https://elements.polymer-project.org/browse?package=neon-elements) elements
+* [packery](http://packery.metafizzy.co/)

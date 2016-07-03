@@ -12,7 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="..\..\bower_components/neon-animation/neon-animation.html">
 <link rel="import" href="..\..\bower_components/paper-spinner/paper-spinner.html">
 
-<dom-module id="my-tweet">
+<dom-module id="tweet-container">
   <template>
     <style is="custom-style" include="shared-styles">
       :host {
@@ -93,37 +93,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
         <div id="predicton" hidden$="{{noOutput}}" style="position:absolute; top: 0px; left: 0px; z-index: 5000">
           <span hidden$="{{!isPositive}}">
-              <paper-fab mini  title="Positive" icon="thumb_up" id="positive" on-tap="dismiss" raised></paper-fab>
+              <paper-fab mini  title="Positive" icon="tweet-icons:thumb-up" id="positive" on-tap="dismiss" raised></paper-fab>
               <!--<span class="smallText">Positive</span>-->
           </span>
           <span hidden$="{{!isNeutral}}">
-              <paper-fab mini  title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="dismiss" raised></paper-fab>
+              <paper-fab mini  title="Neutral" icon="tweet-icons:thumbs-up-down" id="neutral" on-tap="dismiss" raised></paper-fab>
               <!--<span class="smallText">Neutral</span>-->
           </span>
           <span hidden$="{{!isAngry}}">
-              <paper-fab mini  title="Angry" icon="thumb_down" id="angry" on-tap="dismiss" raised></paper-fab>
+              <paper-fab mini  title="Angry" icon="tweet-icons:thumb-down" id="angry" on-tap="dismiss" raised></paper-fab>
               <!--<span class="smallText">Angry</span>-->
           </span>
           <span hidden$="{{!isIrrelevant}}">
-              <paper-fab mini  title="Irrelevant" icon="delete" id="irrelevant" on-tap="dismiss" raised></paper-fab>
+              <paper-fab mini  title="Irrelevant" icon="tweet-icons:delete" id="irrelevant" on-tap="dismiss" raised></paper-fab>
               <!--<span class="smallText">Irrelevant</span>-->
           </span>
         </div>
         <div id="buttonGroup" class$="layout vertical around-justify {{hovered}}">
           <span class="layout vertical center">
-              <paper-fab mini title="Positive" icon="thumb_up" id="positive" on-tap="classify" raised></paper-fab>
+              <paper-fab mini title="Positive" icon="tweet-icons:thumb-up" id="positive" on-tap="classify" raised></paper-fab>
               <span class="smallText">Positive</span>
           </span>
           <span class="layout vertical center">
-              <paper-fab mini title="Neutral" icon="thumbs_up_down" id="neutral" on-tap="classify" raised></paper-fab>
+              <paper-fab mini title="Neutral" icon="tweet-icons:thumbs-up-down" id="neutral" on-tap="classify" raised></paper-fab>
               <span class="smallText">Neutral</span>
           </span>
           <span class="layout vertical center">
-              <paper-fab mini title="Angry" icon="thumb_down" id="angry" on-tap="classify" raised></paper-fab>
+              <paper-fab mini title="Angry" icon="tweet-icons:thumb-down" id="angry" on-tap="classify" raised></paper-fab>
               <span class="smallText">Angry</span>
           </span>
           <span class="layout vertical center">
-              <paper-fab mini title="Irrelevant" icon="delete" id="irrelevant" on-tap="classify" raised></paper-fab>
+              <paper-fab mini title="Irrelevant" icon="tweet-icons:delete" id="irrelevant" on-tap="classify" raised></paper-fab>
               <span class="smallText">Irrelevant</span>
           </span>
         </div>
@@ -137,7 +137,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       'use strict';
 
       Polymer({
-        is: 'my-tweet',
+        is: 'tweet-container',
         properties: {
           fullWidth: {
             type: Number,

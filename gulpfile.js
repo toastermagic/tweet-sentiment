@@ -270,13 +270,16 @@ gulp.task('serve:dist', ['default'], function () {
 });
 
 var ts = require('gulp-typescript');
+var sourcemaps = require('gulp-sourcemaps');
 var tsProject = ts.createProject('tsconfig.json');
 gulp.task('server-typescript', function (cb) {
   var tsResult = tsProject.src()
+    .pipe(sourcemaps.init()) // This means sourcemaps will be generated 
     .pipe(ts(tsProject));
 
-  return tsResult;
-})
+  return tsResult.js.pipe(sourcemaps.write())
+    .pipe(gulp.dest(dist('server')));
+});
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {

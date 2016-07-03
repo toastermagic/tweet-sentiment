@@ -1,46 +1,43 @@
 window.tweetSocket = (function (document) {
-    'use strict';
+    "use strict";
     var socket = io();
-
     var mySocket = {
-        tweetStream: () => {
-            let streamSource = Rx.Observable.create((observer) => {
-                socket.on("tweet", (tweet) => {
+        tweetStream: function () {
+            var streamSource = Rx.Observable.create(function (observer) {
+                socket.on("tweet", function (tweet) {
                     observer.onNext(tweet);
                 });
             });
-
             return streamSource.pausable();
         },
-        statusStream: Rx.Observable.create((observer) => {
-            socket.on("trainingStatus", (status) => {
+        statusStream: Rx.Observable.create(function (observer) {
+            socket.on("trainingStatus", function (status) {
                 observer.onNext({
                     training: status.status === "RUNNING",
                     message: status.message
                 });
             });
         }),
-        requestTweets: (afterTweetId, limit) => {
-            return Rx.Observable.create((observer) => {
+        requestTweets: function (afterTweetId, limit) {
+            return Rx.Observable.create(function (observer) {
                 socket
                     .emit("tweetRequest", {
-                        afterTweetId,
-                        limit
-                    }, (tweets) => {
-                        observer.onNext(tweets);
-                    });
+                    afterTweetId: afterTweetId,
+                    limit: limit
+                }, function (tweets) {
+                    observer.onNext(tweets);
+                });
             });
         },
-        classifyTweet: (options) => {
+        classifyTweet: function (options) {
             socket.emit("classify", {
                 tweetId: options.tweetId,
                 class: options.classification
             });
         },
-        sendCommand: (commandName, options) => {
+        sendCommand: function (commandName, options) {
             socket.emit(commandName, options);
         }
     };
-
     return mySocket;
 })(document);

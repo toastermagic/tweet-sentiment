@@ -191,7 +191,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         add: function() {
           //  get a new tweet
-          mySocket
+          tweetSocket
             .requestTweets(this.lastTweetId, 1)
             .take(1)
             .subscribe((tweets) => {
@@ -204,7 +204,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _classified: function(e) {
           console.log('classifying', e.detail.tweetId, 'as', e.detail.classification);
-          mySocket.classifyTweet(e.detail);
+          tweetSocket.classifyTweet(e.detail);
         },
 
         ready: function() {

@@ -120,12 +120,24 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
 
     db.getTweets().then((tweets: any[]) => {
       let instances = [];
+      var exp = /(\b(https?|ftp|file):\/\/)([-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+
       for (var index = 0; index < tweets.length; index++) {
+        var stripped = tweets[index].tweet.text.replace(exp, "");
+        var wordCount = stripped.split(/\s+/).length;
+        var lower = stripped.replace(/[A-Z]/g,"").length;
+        var upper = stripped.replace(/[a-z]/g,"").length;
+        var upperCaseRatio = upper / (upper + lower);
+
         let trainingInstance = {
-          "csvInstance": [tweets[index].tweet.text,
+          "csvInstance": [
+            stripped,
             getTimeOfDay(tweets[index]),
             JSON.stringify(tweets[index].tweet.geo),
-            tweets[index].tweet.user.screen_name],
+            tweets[index].tweet.user.screen_name,
+            wordCount,
+            upperCaseRatio
+          ],
           "output": tweets[index].classification
         };
         instances.push(trainingInstance);

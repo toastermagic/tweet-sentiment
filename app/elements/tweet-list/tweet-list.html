@@ -83,8 +83,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <div class="layout horizontal end">
       <span class="flex"></span>
-      <paper-fab title="shuffle" raised icon="shuffle" on-tap="shuffle">shuffle</paper-fab>
-      <paper-fab title="find old" raised icon="add" on-tap="add">add</paper-fab>
+      <paper-fab title="shuffle" raised icon="tweet-icons:shuffle" on-tap="shuffle">shuffle</paper-fab>
+      <paper-fab title="find old" raised icon="tweet-icons:add" on-tap="add">add</paper-fab>
     </div>
 
     <div class="layout horizontal center">
@@ -141,7 +141,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           console.log('adding tweet', tweet.tweet.id_str);
 
-          let newTweet = document.createElement("my-tweet");
+          let newTweet = document.createElement("tweet-container");
           newTweet.className += "grid-cell";
           newTweet.setAttribute("id", "tweet" + tweet.tweet.id_str);
           newTweet.tweet = tweet.tweet;

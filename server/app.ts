@@ -110,9 +110,24 @@ function getTimeOfDay(tweet: any): String {
 mySocket.on("connection", (socket: SocketIO.Socket) => {
   console.log("user connected", socket.id);
 
-  socket.on("classify", (options) => {
+  socket.on("classify", (options, callback) => {
     console.log("classify", options.tweetId, options.class);
-    db.updateTweet(options.tweetId, options.class);
+    db.updateTweet(options.tweetId, options.class)
+      .then(() => {
+        db.getClassificationCounts()
+          .then((counts) => {
+            socket.emit("counts", counts);
+          });
+      });
+  });
+
+  socket.on("counts", () => {
+    console.log("counts");
+    db.getClassificationCounts()
+      .then((counts) => {
+        console.log("counted", counts);
+        socket.emit("counts", counts);
+      });
   });
 
   socket.on("train", () => {
@@ -125,8 +140,8 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
       for (var index = 0; index < tweets.length; index++) {
         var stripped = tweets[index].tweet.text.replace(exp, "");
         var wordCount = stripped.split(/\s+/).length;
-        var lower = stripped.replace(/[A-Z]/g,"").length;
-        var upper = stripped.replace(/[a-z]/g,"").length;
+        var lower = stripped.replace(/[A-Z]/g, "").length;
+        var upper = stripped.replace(/[a-z]/g, "").length;
         var upperCaseRatio = upper / (upper + lower);
 
         let trainingInstance = {

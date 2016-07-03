@@ -81,6 +81,9 @@ var optimizeHtmlTask = function(src, dest) {
     .pipe($.if('*.js', $.uglify({
       preserveComments: 'some'
     })))
+    .on('error', function(uglifyErr) {
+      console.log('uglify err', uglifyErr);
+    })
     // Concatenate and minify styles
     // In case you are still using useref build blocks
     .pipe($.if('*.css', $.minifyCss()))

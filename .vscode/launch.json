@@ -19,7 +19,7 @@
             },
             "externalConsole": false,
             "sourceMaps": true,
-            "outDir": "${workspaceRoot}/dist/server"
+            "outDir": "${workspaceRoot}/dist"
         },
         {
             "name": "Launch Noisy",

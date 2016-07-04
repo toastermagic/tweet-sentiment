@@ -5,7 +5,9 @@
         "declaration": false,
         "noImplicitAny": false,
         "noLib": false,
-        "outDir": "dist/server"
+        "outDir": "dist/server",
+        "pretty": true,
+        "sourceMap": true
     },
     "filesGlob": [
         "./**/*.ts",

@@ -18,7 +18,7 @@ var packageJson = require("./package.json");
 var crypto = require("crypto");
 var ensureFiles = require("./tasks/ensure-files.js");
 
-var ts = $.typescript;
+var ts = require("gulp-typescript");
 var tsProject = ts.createProject("tsconfig.json");
 
 var AUTOPREFIXER_BROWSERS = [
@@ -205,16 +205,21 @@ gulp.task("cache-config", function (callback) {
 
 // Clean output directory
 gulp.task("clean", function () {
-	return del([".tmp", dist()]);
+	return del(["server/**/*.js.map", ".tmp", dist()]);
 });
 
-gulp.task("server-typescript", ["lint"], function () {
+gulp.task("server-typescript", function () {
+	// return tsProject.src()
+	// 	.pipe(ts(tsProject))
+	// 	.pipe(gulp.dest(dist("server")));
+
 	var sourcemaps = require("gulp-sourcemaps");
-	var tsResult = tsProject.src({ base: "server" })
+	var tsResult = tsProject.src()
 		.pipe(sourcemaps.init()) // This means sourcemaps will be generated 
 		.pipe(ts(tsProject));
 
-	return tsResult.js.pipe(sourcemaps.write())
+	return tsResult.js
+		.pipe(sourcemaps.write({includeContent: false, sourceRoot: "../../server" }))
 		.pipe(gulp.dest(dist("server")));
 });
 

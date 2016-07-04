@@ -28,6 +28,10 @@ http://polymer.github.io/PATENTS.txt
 		app.$.tweetList._add();
 	};
 
+	app.clear = function () {
+		app.$.tweetList._clear();
+	};
+
 	// Sets app default base URL
 	app.baseUrl = "/";
 	if (window.location.port === "") {  // if production

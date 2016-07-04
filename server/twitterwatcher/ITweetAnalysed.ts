@@ -1,7 +1,7 @@
 import {ITweet} from "./ITweet";
 
 export interface ITweetAnalysed {
-    tweet: ITweet;
+    tweetId: String;
     classification: String;
 
     output: String;
@@ -9,13 +9,13 @@ export interface ITweetAnalysed {
 }
 
 export class TweetAnalysed implements ITweetAnalysed {
-    public tweet: ITweet;
+    public tweetId: String;
     public classification: String;
 
     public output: String;
     public output_multi: any[];
 
     constructor(tweet: ITweet) {
-        this.tweet = tweet;
+        this.tweetId = tweet.id_str;
     }
 }

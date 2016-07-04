@@ -150,14 +150,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
           }
 
-          console.log('adding tweet', tweet.tweet.id_str);
+          console.log('adding tweet', tweet.tweetId);
 
           let newTweet = document.createElement("tweet-container");
           newTweet.className += "grid-cell";
-          newTweet.setAttribute("id", "tweet" + tweet.tweet.id_str);
-          newTweet.tweet = tweet.tweet;
+          newTweet.setAttribute("id", "tweet" + tweet.tweetId);
+          newTweet.tweetId = tweet.tweetId;
           newTweet.output = tweet.output;
-          newTweet.style.zIndex = tweet.zIndex;
           return newTweet;
         },
 
@@ -170,16 +169,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.packery.layout();
 
           tweetCell
-            .fetchTweetAsync(tweet.tweet.id_str)
+            .fetchTweetAsync(tweet.tweetId)
             .then((result) => {
               console.log('tweet loaded', result);
             })
             .catch((err) => {
-              console.log('bad tweet', tweet.tweet.id_str, err);
+              console.log('bad tweet', tweet.tweetId, err);
               this.packery.remove(tweetCell);
               this.packery.layout();
-              tweetSocket.sendCommand("badTweet", tweet.tweet.id_str);
-              // this.add(tweet.tweet.id_str);
+              tweetSocket.sendCommand("badTweet", tweet.tweetId);
+              // this.add(tweet.tweetId);
               return;
             });
         },
@@ -235,7 +234,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .subscribe((tweets) => {
               _(tweets).forEach((tweet) => {
                 this.showTweet(tweet)
-                this.lastTweetId = tweet.tweet.id_str;
+                this.lastTweetId = tweet.tweetId;
               });
             });
         },

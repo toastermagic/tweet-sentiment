@@ -3,7 +3,7 @@
 
 import { Config } from "./config";
 import { CloudPredictor } from "./cloudprediction";
-import { ITweet, IMyTweet, TweetAnalysed, TwitterWatcher } from "./twitterwatcher";
+import { ITweet, TweetAnalysed, TwitterWatcher } from "./twitterwatcher";
 import { Database } from "./database";
 import * as socketIo from "socket.io";
 import * as express from "express";
@@ -92,7 +92,6 @@ function pollStatus() {
 function convertTweet(tweet: ITweet): Promise<TweetAnalysed> {
   "use strict";
   let casted: TweetAnalysed = new TweetAnalysed(tweet);
-
   return new Promise((res, rej) => {
     if (apiMode === "predict") {
       predictor.predict("tweetSentiment", { "csvInstance": [tweet.text] })
@@ -235,7 +234,7 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
     () => { console.log("user disconnected", socket.id); });
 });
 
-tweetWatcher.on("tweet", (tweet: IMyTweet) => {
+tweetWatcher.on("tweet", (tweet: ITweet) => {
 
   if (tweet.retweeted_status) {
     // ignore retweets
@@ -243,8 +242,7 @@ tweetWatcher.on("tweet", (tweet: IMyTweet) => {
   }
 
   console.log(new Date(), tweet.text);
-  tweet.trackingTerm = trackingTerm;
-  db.storeTweet(tweet);
+  db.storeTweet(trackingTerm, tweet);
 
   convertTweet(tweet)
     .then((newTweet) => mySocket.emit("tweet", newTweet));

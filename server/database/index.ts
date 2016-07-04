@@ -12,12 +12,13 @@ export class Database {
         this.checkDbExists();
     }
 
-    public storeTweet(tweet: ITweet) {
+    public storeTweet(trackingTerm: String, tweet: ITweet) {
         couch.uniqid()
             .then(ids => {
                 couch.insert("training", {
                     _id: ids[0],
-                    tweet
+                    tweet,
+                    trackingTerm
                 }).then((result) => {
                     // console.log("training data stored");
                 }, err => {
@@ -39,13 +40,13 @@ export class Database {
                     let doc = result.data.rows[0];
 
                     couch.del("training", doc.value._id, doc.value._rev)
-                    .then(() => {
-                        console.log("bad tweet deleted");
-                        res();
-                    }, err => {
-                        console.log("couldn't delete bad tweet", err);
-                        rej(err);
-                    });
+                        .then(() => {
+                            console.log("bad tweet deleted");
+                            res();
+                        }, err => {
+                            console.log("couldn't delete bad tweet", err);
+                            rej(err);
+                        });
                 }, err => {
                     console.log("error locationg tweet with id", tweetId, err);
                     rej(err);
@@ -106,7 +107,7 @@ export class Database {
                 .then((results) => {
                     let count = new Object();
                     results.data.rows.map((row) => {
-                        count[row.key  || "unclassified"] = row.value;
+                        count[row.key || "unclassified"] = row.value;
                     });
                     res(count);
                 },
@@ -151,17 +152,24 @@ export class Database {
                         "all": {
                             "map": "function(doc){ if (doc.tweet) { emit(null, doc) }}"
                         },
-                        "by_classification": {
-                            "map": "function(doc){ if (doc.classification) { emit(doc.classification, doc) }}"
-                        },
                         "by_tweetId": {
                             "map": "function(doc){ if (doc.tweet.id_str) { emit(doc.tweet.id_str, doc) }}"
+                        },
+                        "unclassified": {
+                            "map": "function(doc){ if (doc.tweet && !doc.classification) emit(doc.tweet.id_str, doc);}"
+                        },
+                        "count_by_classification": {
+                            "map": "function(doc){ if (doc.tweet) {emit(doc.classification, 1); }}",
+                            "reduce": "_sum"
+                        },
+                        "classified": {
+                            "map": "function(doc) { if (doc.tweet && doc.classification) emit(null, doc);}"
                         }
                     }
                 }).then((result) => {
-                    console.log("design view created");
+                    console.log("design views created");
                 }, err => {
-                    console.log("could not create design view", err);
+                    console.log("could not create design views", err);
                 });
             }, err => {
                 console.log("could not create database", err);

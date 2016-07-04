@@ -1,7 +1,3 @@
-export interface IMyTweet extends ITweet {
-    trackingTerm: String;
-}
-
 export interface ITweet {
     //  unused. Future/beta home for status annotations.  
     annotations: Object;

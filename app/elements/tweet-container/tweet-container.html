@@ -155,8 +155,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: false,
             notify: true
           },
-          tweet: {
-            type: Object
+          tweetId: {
+            type: String
           },
           classified: String,
           output: {
@@ -224,7 +224,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           setTimeout(() => {
             this.fire('removeMe', {
-              tweetId: this.tweet.id_str,
+              tweetId: this.tweetId,
               noLayout: noLayout
             });
           }, 250);
@@ -234,14 +234,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.classified = "classified";
 
           this.fire('classified', {
-            tweetId: this.tweet.id_str,
+            tweetId: this.tweetId,
             //  use e.currentTarget rather than e.target or we'll sometimes get the icon rather than the button
             classification: e.currentTarget.id
           });
 
           setTimeout(() => {
             this.fire('removeMe', {
-              tweetId: this.tweet.id_str
+              tweetId: this.tweetId
             });
           }, 1000);
         },

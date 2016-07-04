@@ -19,67 +19,75 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       
       paper-checkbox {
-        --paper-checkbox-checked-color: #ccc;
-        --paper-checkbox-unchecked-color: #ccc;
-        --paper-checkbox-label-color: #ccc;
+        display: block;
+        margin: 10px;
+      }
+      
+      paper-button {
+        display: block;
+        margin: 10px;
       }
       
       paper-input {
-        --paper-input-container-color: #ccc;
-        --paper-input-container-focus-color: #fff;
-        --paper-input-container-input-color: #ccc;
-      }
-      
-      paper-fab {
-        margin-left: 5px;
+        margin: 10px;
       }
       
       .count-box {
         border: 3px solid #ccc;
-        border-radius: 5px;
         padding: 5px;
+        text-align: center;
       }
     </style>
 
-    <paper-input label="Tracking" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
 
-    <paper-fab id="shuffle" mini title="shuffle" raised icon="tweet-icons:shuffle" on-tap="shuffle"></paper-fab>
-    <paper-fab id="add" mini title="get old tweet" raised icon="tweet-icons:add" on-tap="add"></paper-fab>
-    <paper-fab id="refresh" mini title="refresh counts" icon="tweet-icons:refresh" on-tap="refresh"></paper-fab>
+    <div class="layout vertical">
+      <paper-button on-tap="clear">
+        <iron-icon icon="tweet-icons:clear"></iron-icon>
+        Clear
+      </paper-button>
 
-    <span class="layout horizontal">
-      <paper-button id="unclassifiedCount" raised title="unclassified" class="count-box">
+      <paper-button on-tap="shuffle">
+        <iron-icon icon="tweet-icons:shuffle"></iron-icon>
+        Shuffle
+      </paper-button>
+
+      <paper-button on-tap="add">
+        <iron-icon icon="tweet-icons:add"></iron-icon>
+        Get Old Tweet
+      </paper-button>
+
+      <paper-input type="search" label="Tracking" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
+
+      <paper-button id="unclassifiedCount" title="unclassified" class="count-box">
         <iron-icon icon="tweet-icons:unknown"></iron-icon>
         <span>{{counts.unclassified}}</span>
-    </paper-button>
-    <paper-button id="positiveCount" raised title="positive" class="count-box">
-      <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
-      <span>{{counts.positive}}</span>
-    </paper-button>
-    <paper-button id="neutralCount" raised title="neutral" class="count-box">
-      <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
-      <span>{{counts.neutral}}</span>
-    </paper-button>
-    <paper-button id="angryCount" raised title="angry" class="count-box">
-      <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
-      <span>{{counts.angry}}</span>
-    </paper-button>
-    <paper-button id="irrelevantCount" raised title="irrelevant" class="count-box">
-      <iron-icon icon="tweet-icons:delete"></iron-icon>
-      <span>{{counts.irrelevant}}</span>
-    </paper-button>
-    </span>
+      </paper-button>
 
-    <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
+      <paper-button id="positiveCount" title="positive" class="count-box">
+        <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
+        <span>{{counts.positive}}</span>
+      </paper-button>
+      <paper-button id="neutralCount" title="neutral" class="count-box">
+        <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
+        <span>{{counts.neutral}}</span>
+      </paper-button>
+      <paper-button id="angryCount" title="angry" class="count-box">
+        <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
+        <span>{{counts.angry}}</span>
+      </paper-button>
+      <paper-button id="irrelevantCount" title="irrelevant" class="count-box">
+        <iron-icon icon="tweet-icons:delete"></iron-icon>
+        <span>{{counts.irrelevant}}</span>
+      </paper-button>
 
-    <span>
-      <label for="subscribeMode" style="color:#ccc">Subscribe</label>
-      <paper-checkbox id="subscribeMode" checked="{{subscribeMode}}"></paper-checkbox>
-    <span>
-    <span>
-      <label for="predictMode" style="color:#ccc">Predict</label>
-      <paper-checkbox id="predictMode" checked="{{predictMode}}"></paper-checkbox>
-    <span>
+      <paper-button disabled$="{{training}}" style="background:#0c0" on-tap="train">
+        <iron-icon icon="tweet-icons:directions-railway"></iron-icon>
+        <span>Train</span>
+      </paper-button>
+
+      <paper-checkbox id="subscribeMode" checked="{{subscribeMode}}">Subscribe</paper-checkbox>
+      <paper-checkbox id="predictMode" checked="{{predictMode}}">Predict</paper-checkbox>
+    </div>
 
   </template>
   <script>
@@ -190,11 +198,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         this.statusSubscription = tweetSocket.statusStream.subscribe((status) => {
-          console.log('training status', status);
           this.training = status.training;
           this.statusMessage = status.message;
-          app.$.toast.text = this.statusMessage;
-          app.$.toast.show();
+          app.$.toast.show({text: this.statusMessage});
         });
 
         this.subscribeMode = true;
@@ -220,6 +226,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       add: function() {
         this.fire('add');
+      },
+      clear: function() {
+        this.fire('clear');
       }
     });
   })();

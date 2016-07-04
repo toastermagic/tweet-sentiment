@@ -27,9 +27,9 @@
             "request": "launch",
             "program": "${workspaceRoot}/server/app.ts",
             "stopOnEntry": false,
-            "args": ["brexit"],
+            "args": ["nhs"],
             "cwd": "${workspaceRoot}",
-            "preLaunchTask": null,
+            "preLaunchTask": "default",
             "runtimeExecutable": null,
             "runtimeArgs": [
                 "--nolazy"

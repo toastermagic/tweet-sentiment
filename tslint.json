@@ -28,6 +28,9 @@
             false,
             "always"
         ],
+        "no-console": [
+            false
+        ],
         "semicolon": [
             true,
             "always"

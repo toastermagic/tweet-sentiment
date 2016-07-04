@@ -12,10 +12,25 @@ window.tweetSocket = (function (document) {
 		},
 		statusStream: Rx.Observable.create(function (observer) {
 			socket.on("trainingStatus", function (status) {
-				observer.onNext({
-					training: status.status === "RUNNING",
-					message: status.message
-				});
+				if (status.status === "ACCEPTED") {
+					observer.onNext({
+						training: true,
+						message: status.message
+					});
+				} else if (status.status === "RUNNING") {
+					// ignore these, there could be a lot of them
+				} else if (status.status === "DONE") {
+					observer.onNext({
+						training: false,
+						message: status.message
+					});
+				} else {
+					// problem?
+					observer.onNext({
+						training: false,
+						message: status.message
+					});
+				}
 			});
 		}),
 		countStream: Rx.Observable.create(function (observer) {

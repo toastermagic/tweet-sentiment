@@ -22,6 +22,10 @@ export class TwitterWatcher extends EventEmitter {
 
     public track(term: String) {
         console.log("tracking", term);
+        if (this.tweetStream) {
+            this.tweetStream.destroy();
+        }
+
         this.tweetStream = this.tApi.stream("statuses/filter", { track: term });
 
         this.tweetStream.on("error", (err: Error) => {

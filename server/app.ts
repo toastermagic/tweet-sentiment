@@ -29,6 +29,10 @@ let predictor = new CloudPredictor(null, config, container);
 
 let trainingStart = new Date();
 
+process.on("uncaughtException", (err: Error) => {
+  console.log("Uncaught exception:", err);
+});
+
 if (PROD) {
   staticPath = __dirname + "/../../dist/";
 } else {

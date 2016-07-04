@@ -15,26 +15,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="tweet-container">
   <template>
     <style is="custom-style" include="shared-styles">
-      :host {
-      }
+      :host {}
       
       #buttonGroup {
-        border-radius: 5px 5px 5px 5px;
+        padding:20px 10px 10px 10px;
+        border-radius: 5px;
         background: rgba(200, 200, 200, 0.85);
-        border-top: 1px 1px 0px 1px solid #333;
-        width: 0px;
-        left: 220px;
+        left: 20px;
+        bottom: 0px;
         transition: all 1s;
         z-index: 2000;
         position: absolute;
-        opacity:0;
+        opacity: 0;
       }
       
-      #buttonGroup.hovered {
+      #buttonGroup.tapped {
+        bottom: -80px;
         opacity: 1;
-        width: unset;
       }
       
+      #hoverWrapper {
+        position: relative;
+      }
+
       .classified {
         -webkit-filter: grayscale(100%);
         filter: grayscale(100%);
@@ -43,7 +46,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .hoverWrapper {
         position: relative;
       }
-
+      
       paper-spinner {
         position: absolute;
         top: 100px;
@@ -71,25 +74,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       
       #tweetContainer {
-        -webkit-transition: transform 0.2s;
-        -moz-transition: transform 0.2s;
-        transition: transform 0.2s;
-        transform-origin: 0 0;
-        z-index: 3000;
-        transform: scale(0.6, 0.6);
+        -webkit-transition: transform 0.2s, box-shadow 0.2s;
+        -moz-transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
+        /*transform-origin: 0 0;*/
+        transform: scale(1.0, 1.0);
       }
+      
       .smallText {
         font-size: smaller;
       }
+      
       #tweetContainer.hovered {
-        transform: scale(1.0, 1.0);
+        /*transform: scale(1.1, 1.1);*/
+      }
+
+      #tweetContainer.tapped {
+        transform: scale(1.05, 1.05);
       }
     </style>
     <div id="spinnerContainer" class="layout vertical center">
       <paper-spinner active="{{loading}}"></paper-spinner>
     </div>
 
-    <div id="wrapper" class$="{{hovered}}">
+    <div id="wrapper">
       <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
         <div id="predicton" hidden$="{{noOutput}}" style="position:absolute; top: 0px; left: 0px; z-index: 5000">
           <span hidden$="{{!isPositive}}">
@@ -109,7 +117,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <!--<span class="smallText">Irrelevant</span>-->
           </span>
         </div>
-        <div id="buttonGroup" class$="layout vertical around-justify {{hovered}}">
+        <div id="buttonGroup" style="z-index: 400" class$="layout horizontal around-justify {{tapped}}">
           <span class="layout vertical center">
               <paper-fab mini title="Positive" icon="tweet-icons:thumb-up" id="positive" on-tap="classify" raised></paper-fab>
               <span class="smallText">Positive</span>
@@ -127,7 +135,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <span class="smallText">Irrelevant</span>
           </span>
         </div>
-        <div id="tweetContainer" class$="{{classified}} {{hovered}}" hidden$="{{loading}}">
+        <div style="position:relative; z-index: 500">
+          <div on-tap="tap" style="position: absolute; width:100%; height:100%;z-index:2"></div>
+          <paper-material style="z-index:1" elevation="{{elevation}}" id="tweetContainer" class$="{{classified}} {{hovered}} {{tapped}}" hidden$="{{loading}}">
+          </paper-material>
         </div>
       </div>
     </div>
@@ -139,6 +150,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'tweet-container',
         properties: {
+          elevation: {
+            type: Number,
+            value: 1
+          },
           fullWidth: {
             type: Number,
             value: 250
@@ -146,10 +161,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           zIndex: {
             type: Number,
             value: function() {
-              return Math.floor(Math.random() * 290) + 10;
-            }
+              return 0; //  Math.floor(Math.random() * 290) + 10;
+            },
+            notify: true
           },
           hovered: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+          tapped: {
             type: Boolean,
             value: false,
             notify: true
@@ -231,12 +252,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         onUnhovered: function() {
-          this.fire('unHovered');
           this.hovered = "";
+          this.fire('unHovered');
+        },
+
+        onTapped: function() {
+          if (!this.classified) {
+            this.tapped = "tapped";
+            this.elevation = 5;
+            this.style.zIndex = 800;
+            this.fire('tapped');
+          }
+        },
+
+        onUntapped: function() {
+          this.elevation = 1;
+          this.tapped = "";
+          this.style.zIndex = 0;
+          this.fire('unTapped');
         },
 
         ready: function() {
-          this.$.wrapper.style.width = (this.fullWidth / 2) + "px";
+          this.$.wrapper.style.width = this.fullWidth;
         },
 
         hideAnimation: function() {
@@ -273,7 +310,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
           }, 1000);
         },
-
+        tap: function() {
+          this.tapped = !this.tapped;
+          if (this.tapped) {
+            this.onTapped();
+          } else {
+            this.onUntapped();
+          }
+        },
         fetchTweetAsync: function(tweetId) {
           let p = new Promise((res, rej) => {
             this.loading = true;

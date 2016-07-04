@@ -24,6 +24,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-checkbox-label-color: #ccc;
       }
 
+      paper-input {
+        --paper-input-container-color: #ccc;
+        --paper-input-container-focus-color: #fff;
+        --paper-input-container-input-color: #ccc;
+      }
+
       paper-fab {
         margin-left: 5px;
       }
@@ -34,6 +40,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 5px;
       }
     </style>
+
+    <paper-input label="Tracking" value="{{trackingTerm}}"></paper-input>
 
     <paper-fab id="shuffle" mini title="shuffle" raised icon="tweet-icons:shuffle" on-tap="shuffle"></paper-fab>
     <paper-fab id="add" mini title="get old tweet" raised icon="tweet-icons:add" on-tap="add"></paper-fab>
@@ -95,11 +103,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         tweetStream: Object,
         tweetSubscription: Object,
         countSubscription: Object,
+        trackingSubscription: Object,
         counts: {
           type: Object,
           notify: true
         },
-        training: Boolean
+        training: Boolean,
+        trackingTerm: {
+          type: String,
+          notify: true
+        }
       },
       _changePredict: function(newPredictMode) {
         app.$.toast.text = "Setting server to " + (newPredictMode ? "predict" : "learn") + "mode";
@@ -122,6 +135,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ready: function() {
         this.tweetStream = tweetSocket.tweetStream();
 
+        this.trackingSubscription = tweetSocket.trackingStream.subscribe((term) => {
+          this.trackingTerm = term;
+        });
+
         this.countSubscription = tweetSocket.countStream.subscribe((counts) => {
           this.counts = counts;
         });
@@ -136,9 +153,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         this.subscribeMode = true;
         this.refresh();
+        this.getTrack();
       },
       refresh: function() {
         tweetSocket.sendCommand("counts");
+      },
+      train: function() {
+        tweetSocket.sendCommand("train");
+      },
+      getTrack: function() {
+        tweetSocket.sendCommand("getTrack", (term) => {
+          this.trackingTerm = term;
+        });
+      },
+      setTrack: function(term) {
+        tweetSocket.sendCommand("setTrack", term);
       },
       shuffle: function() {
         this.fire('shuffle');
@@ -146,9 +175,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       add: function() {
         this.fire('add');
       },
-      train: function() {
-        tweetSocket.sendCommand("train");
-      }
     });
   })();
   </script>

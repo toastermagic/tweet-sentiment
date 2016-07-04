@@ -24,10 +24,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
       
-      .hovered {
-        z-index: 500;
-      }
-      
       paper-radio-button {
         --paper-radio-button-checked-color: #ccc;
         --paper-radio-button-unchecked-color: #ccc;
@@ -76,6 +72,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 0px;
       }
       
+      tweet-container::shadow .grid-cell {
+        width: 300px;
+      }
+      
       .predicted {
         font-weight: bold;
         text-decoration: underline;
@@ -117,19 +117,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'loaded': '_loaded',
           'hovered': '_hovered',
           'unHovered': '_unHovered',
+          'tapped': '_tapped',
+          'unTapped': '_unTapped',
           'classified': '_classified',
           'add': '_add',
           'shuffle': '_shuffle'
         },
 
         _hovered: function(e) {
-          e.target.style.zIndex = 500;
-          e.target.classList.add("ignore-shuffle");
         },
 
         _unHovered: function(e) {
+        },
+
+        _tapped: function(e) {
+          let others = _.reject(this.packery.items, (item) => item.element.id === e.target.id)
+          _.each(others, (item) => item.element.onUntapped());
+
+          e.target.style.zIndex = 500;
+          e.target.classList.add("ignore-shuffle");
+          // this.$.overlay._show();
+        },
+
+        _unTapped: function(e) {
           e.target.style.zIndex = e.target.zIndex;
           e.target.classList.remove("ignore-shuffle");
+          // this.$.overlay._hide();
         },
 
         makeTweetElement: function(tweet) {
@@ -165,7 +178,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               console.log('bad tweet', tweet.tweet.id_str, err);
               this.packery.remove(tweetCell);
               this.packery.layout();
-              mySocket.sendCommand("badTweet", tweet.tweet.id_str);
+              tweetSocket.sendCommand("badTweet", tweet.tweet.id_str);
               // this.add(tweet.tweet.id_str);
               return;
             });
@@ -173,17 +186,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _shuffle: function(currentTweetId) {
             var shufflers = [];
-            var nonShufflers = [];
+            var nonShuffler;
+            var nonShufflerIndex;
             for ( var i=0, len = this.packery.items.length; i < len; i++ ) {
               var item = this.packery.items[i];
-              var collection = item.element.classList.contains('ignore-shuffle') ? nonShufflers : shufflers;
-              collection.push( item );
+              
+              if (item.element.classList.contains('ignore-shuffle')) {
+                nonShufflerIndex = i;
+              }
+
+              shufflers.push(item);
             }
 
-            shufflers.sort( function() {
+            if (nonShufflerIndex) {
+              nonShuffler = shufflers.splice(nonShufflerIndex, 1)[0];
+            }
+
+            shufflers.sort(function() {
               return Math.random() > 0.5;
             });
-            this.packery.items = nonShufflers.concat(shufflers);
+
+            if (nonShuffler) {
+              shufflers.splice(nonShufflerIndex, 0, nonShuffler);
+            }
+
+            this.packery.items = shufflers;
             this.packery.layout();
         },
 
@@ -217,6 +244,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.showTweet(tweet, false);
             }
           });
+
+          // this.$.overlay.open();
         },
 
         _removeMe: function(e) {

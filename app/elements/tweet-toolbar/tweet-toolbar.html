@@ -41,7 +41,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <paper-input label="Tracking" value="{{trackingTerm}}"></paper-input>
+    <paper-input label="Tracking" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
 
     <paper-fab id="shuffle" mini title="shuffle" raised icon="tweet-icons:shuffle" on-tap="shuffle"></paper-fab>
     <paper-fab id="add" mini title="get old tweet" raised icon="tweet-icons:add" on-tap="add"></paper-fab>
@@ -133,6 +133,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }                
       },
+      checkForEnter: function(e) {
+        if (e.keyCode === 13 && this.trackingTerm.length > 2) {
+          app.$.toast.text = "Requesting new tracking term:" + this.trackingTerm;
+          app.$.toast.show();
+          tweetSocket.sendCommand("setTrack", this.trackingTerm);
+        }
+      },
       _changePredict: function(newPredictMode) {
         app.$.toast.text = "Setting server to " + (newPredictMode ? "predict" : "learn") + "mode";
         app.$.toast.show();
@@ -174,6 +181,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         this.trackingSubscription = tweetSocket.trackingStream.subscribe((term) => {
           this.trackingTerm = term;
+          app.$.toast.text = "Now tracking term:" + this.trackingTerm;
+          app.$.toast.show();
         });
 
         this.countSubscription = tweetSocket.countStream.subscribe((newCounts) => {

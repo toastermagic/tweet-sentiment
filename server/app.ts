@@ -3,7 +3,7 @@
 
 import { Config } from "./config";
 import { CloudPredictor } from "./cloudprediction";
-import { ITweet, TweetAnalysed, TwitterWatcher } from "./twitterwatcher";
+import { ITweet, IMyTweet, TweetAnalysed, TwitterWatcher } from "./twitterwatcher";
 import { Database } from "./database";
 import * as socketIo from "socket.io";
 import * as express from "express";
@@ -231,7 +231,7 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
     () => { console.log("user disconnected", socket.id); });
 });
 
-tweetWatcher.on("tweet", (tweet: ITweet) => {
+tweetWatcher.on("tweet", (tweet: IMyTweet) => {
 
   if (tweet.retweeted_status) {
     // ignore retweets
@@ -239,6 +239,7 @@ tweetWatcher.on("tweet", (tweet: ITweet) => {
   }
 
   console.log(new Date(), tweet.text);
+  tweet.trackingTerm = trackingTerm;
   db.storeTweet(tweet);
 
   convertTweet(tweet)

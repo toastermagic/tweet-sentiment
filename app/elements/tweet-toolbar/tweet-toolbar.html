@@ -23,17 +23,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-checkbox-unchecked-color: #ccc;
         --paper-checkbox-label-color: #ccc;
       }
-
+      
       paper-input {
         --paper-input-container-color: #ccc;
         --paper-input-container-focus-color: #fff;
         --paper-input-container-input-color: #ccc;
       }
-
+      
       paper-fab {
         margin-left: 5px;
       }
-
+      
       .count-box {
         border: 3px solid #ccc;
         border-radius: 5px;
@@ -48,26 +48,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-fab id="refresh" mini title="refresh counts" icon="tweet-icons:refresh" on-tap="refresh"></paper-fab>
 
     <span class="layout horizontal">
-      <paper-button raised title="unclassified" class="count-box">
+      <paper-button id="unclassifiedCount" raised title="unclassified" class="count-box">
         <iron-icon icon="tweet-icons:unknown"></iron-icon>
         <span>{{counts.unclassified}}</span>
-      </paper-button>
-      <paper-button title="positive" class="count-box">
-        <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
-        <span>{{counts.positive}}</span>
-      </paper-button>
-      <paper-button raised title="neutral" class="count-box">
-        <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
-        <span>{{counts.neutral}}</span>
-      </paper-button>
-      <paper-button raised title="angry" class="count-box">
-        <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
-        <span>{{counts.angry}}</span>
-      </paper-button>
-      <paper-button raised title="irrelevant" class="count-box">
-        <iron-icon icon="tweet-icons:delete"></iron-icon>
-        <span>{{counts.irrelevant}}</span>
-      </paper-button>
+    </paper-button>
+    <paper-button id="positiveCount" raised title="positive" class="count-box">
+      <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
+      <span>{{counts.positive}}</span>
+    </paper-button>
+    <paper-button id="neutralCount" raised title="neutral" class="count-box">
+      <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
+      <span>{{counts.neutral}}</span>
+    </paper-button>
+    <paper-button id="angryCount" raised title="angry" class="count-box">
+      <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
+      <span>{{counts.angry}}</span>
+    </paper-button>
+    <paper-button id="irrelevantCount" raised title="irrelevant" class="count-box">
+      <iron-icon icon="tweet-icons:delete"></iron-icon>
+      <span>{{counts.irrelevant}}</span>
+    </paper-button>
     </span>
 
     <paper-button raised disabled$="{{training}}" style="background:#0c0; margin-right:16px" on-tap="train">Train</paper-button>
@@ -89,6 +89,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'tweet-toolbar',
 
+      behaviors: [Polymer.NeonAnimationRunnerBehavior],
+
       properties: {
         predictMode: {
           type: Boolean,
@@ -106,13 +108,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         trackingSubscription: Object,
         counts: {
           type: Object,
-          notify: true
+          notify: true,
+          value: {
+            angry: '', neutral: '', positive: '', irrelevant: '', unclassified: '' 
+          }
+        },
+        prevCounts: {
+          type: Object,
+          value: {
+            angry: '', neutral: '', positive: '', irrelevant: '', unclassified: '' 
+          }
         },
         training: Boolean,
         trackingTerm: {
           type: String,
           notify: true
-        }
+        },
+        animationConfig: {
+          value: function() {
+            return {
+              name: 'ripple-animation',
+              node: this
+            }
+          }
+        }                
       },
       _changePredict: function(newPredictMode) {
         app.$.toast.text = "Setting server to " + (newPredictMode ? "predict" : "learn") + "mode";
@@ -132,6 +151,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
       },
+      rippleElement: function(el) {
+        el.getRipple().downAction();
+        setTimeout(() => {
+          el.getRipple().upAction();
+        }, 50);
+      },
+      updateCount: function(countName, newCounts) {
+        if (this.counts[countName] !== newCounts[countName]) {
+          this.rippleElement(this.$$("#" + countName + "Count"))
+        }
+      },
+      updateCounts: function(newCounts) {
+        _(["angry", "irrelevant", "unclassified", "positive", "neutral"])
+        .each((classification) => {
+          this.updateCount(classification, newCounts);
+        })
+        this.counts = newCounts;
+      },
       ready: function() {
         this.tweetStream = tweetSocket.tweetStream();
 
@@ -139,8 +176,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.trackingTerm = term;
         });
 
-        this.countSubscription = tweetSocket.countStream.subscribe((counts) => {
-          this.counts = counts;
+        this.countSubscription = tweetSocket.countStream.subscribe((newCounts) => {
+          this.updateCounts(newCounts);
         });
 
         this.statusSubscription = tweetSocket.statusStream.subscribe((status) => {
@@ -174,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       add: function() {
         this.fire('add');
-      },
+      }
     });
   })();
   </script>

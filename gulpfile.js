@@ -18,7 +18,8 @@ var packageJson = require("./package.json");
 var crypto = require("crypto");
 var ensureFiles = require("./tasks/ensure-files.js");
 
-// var ghPages = require("gulp-gh-pages");
+var ts = $.typescript;
+var tsProject = ts.createProject("tsconfig.json");
 
 var AUTOPREFIXER_BROWSERS = [
 	"ie >= 10",
@@ -149,7 +150,7 @@ gulp.task("fonts", function () {
 });
 
 // Scan your HTML for assets & optimize them
-gulp.task("html", ["polylint"], function () {
+gulp.task("html", function () {
 	return optimizeHtmlTask(
 		["app/**/*.html", "!app/{elements,test,bower_components}/**/*.html"],
 		dist());
@@ -207,15 +208,12 @@ gulp.task("clean", function () {
 	return del([".tmp", dist()]);
 });
 
-var ts = require("gulp-typescript");
-var sourcemaps = require("gulp-sourcemaps");
-var tsProject = ts.createProject("tsconfig.json");
 gulp.task("server-typescript", ["lint"], function () {
 	var tsResult = tsProject.src()
-		.pipe(sourcemaps.init()) // This means sourcemaps will be generated 
+		.pipe($.sourcemaps.init()) // This means sourcemaps will be generated 
 		.pipe(ts(tsProject));
 
-	return tsResult.js.pipe(sourcemaps.write())
+	return tsResult.js.pipe($.sourcemaps.write())
 		.pipe(gulp.dest(dist("server")));
 });
 

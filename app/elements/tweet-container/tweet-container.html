@@ -85,10 +85,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-size: smaller;
       }
       
-      #tweetContainer.hovered {
-        /*transform: scale(1.1, 1.1);*/
-      }
-
       #tweetContainer.tapped {
         transform: scale(1.05, 1.05);
       }
@@ -98,23 +94,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <div id="wrapper">
-      <div id="hoverWrapper" on-mouseover="onHovered" on-mouseout="onUnhovered">
+      <div id="hoverWrapper">
         <div id="predicton" hidden$="{{noOutput}}" style="position:absolute; top: 0px; left: 0px; z-index: 5000">
           <span hidden$="{{!isPositive}}">
               <paper-fab mini  title="Positive" icon="tweet-icons:thumb-up" id="positive" on-tap="dismiss" raised></paper-fab>
-              <!--<span class="smallText">Positive</span>-->
           </span>
           <span hidden$="{{!isNeutral}}">
               <paper-fab mini  title="Neutral" icon="tweet-icons:thumbs-up-down" id="neutral" on-tap="dismiss" raised></paper-fab>
-              <!--<span class="smallText">Neutral</span>-->
           </span>
           <span hidden$="{{!isAngry}}">
               <paper-fab mini  title="Angry" icon="tweet-icons:thumb-down" id="angry" on-tap="dismiss" raised></paper-fab>
-              <!--<span class="smallText">Angry</span>-->
           </span>
           <span hidden$="{{!isIrrelevant}}">
               <paper-fab mini  title="Irrelevant" icon="tweet-icons:delete" id="irrelevant" on-tap="dismiss" raised></paper-fab>
-              <!--<span class="smallText">Irrelevant</span>-->
           </span>
         </div>
         <div id="buttonGroup" style="z-index: 400" class$="layout horizontal around-justify {{tapped}}">
@@ -137,7 +129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <div style="position:relative; z-index: 500">
           <div on-tap="tap" style="position: absolute; width:100%; height:100%;z-index:2"></div>
-          <paper-material style="z-index:1" elevation="{{elevation}}" id="tweetContainer" class$="{{classified}} {{hovered}} {{tapped}}" hidden$="{{loading}}">
+          <paper-material style="z-index:1" elevation="{{elevation}}" id="tweetContainer" class$="{{classified}} {{tapped}}" hidden$="{{loading}}">
           </paper-material>
         </div>
       </div>
@@ -165,11 +157,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             notify: true
           },
-          hovered: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
           tapped: {
             type: Boolean,
             value: false,
@@ -188,23 +175,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true,
             value: true
-          },
-          animationConfig: {
-            value: function() {
-              return {
-                'entry': {
-                  name: 'fade-in-animation',
-                  node: this
-                },
-                'exit': [{
-                  name: 'fade-out-animation',
-                  node: this
-                }, {
-                  name: 'scale-down-animation',
-                  node: this
-                }]
-              }
-            }
           },
           isAngry: {
             type: Boolean,
@@ -228,32 +198,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
 
-        behaviors: [
-          Polymer.NeonAnimationRunnerBehavior
-        ],
-
-        listeners: {
-          'neon-animation-finish': '_onNeonAnimationFinish'
-        },
-
         compareOutcome: function(output, label) {
           return output == label;
         },
 
         noOutput: function(output) {
           return output === null;
-        },
-
-        onHovered: function() {
-          if (!this.classified) {
-            this.hovered = "hovered";
-            this.fire('hovered');
-          }
-        },
-
-        onUnhovered: function() {
-          this.hovered = "";
-          this.fire('unHovered');
         },
 
         onTapped: function() {
@@ -276,27 +226,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.wrapper.style.width = this.fullWidth;
         },
 
-        hideAnimation: function() {
-          this.playAnimation('exit');
-        },
-
-        _onNeonAnimationFinish: function() {
-          this.style.display = "none";
-        },
-
-        dismiss: function(e) {
-          this.onUnhovered();
+        dismiss: function(noLayout) {
+          this.classified = "classified";
 
           setTimeout(() => {
             this.fire('removeMe', {
-              tweetId: this.tweet.id_str
+              tweetId: this.tweet.id_str,
+              noLayout: noLayout
             });
           }, 250);
         },
 
         classify: function(e) {
           this.classified = "classified";
-          this.onUnhovered();
 
           this.fire('classified', {
             tweetId: this.tweet.id_str,

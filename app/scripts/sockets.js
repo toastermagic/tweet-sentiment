@@ -24,6 +24,11 @@ window.tweetSocket = (function (document) {
                 observer.onNext(counts);
             });
         }),
+        trackingStream: Rx.Observable.create(function (observer) {
+            socket.on("tracking", function (term) {
+                observer.onNext(term);
+            });
+        }),
         requestTweets: function (afterTweetId, limit) {
             return Rx.Observable.create(function (observer) {
                 socket

@@ -48,7 +48,11 @@ server.listen(PORT, function (err) {
   console.log("express listening on port " + PORT);
 });
 
-tweetWatcher.track("nhs");
+let trackingTerm = process.argv.length > 2 ? process.argv[2] : "";
+if (trackingTerm) {
+  tweetWatcher.track(trackingTerm);
+}
+
 
 function pollStatus() {
   predictor.getModelById("tweetSentiment")
@@ -109,6 +113,18 @@ function getTimeOfDay(tweet: any): String {
 
 mySocket.on("connection", (socket: SocketIO.Socket) => {
   console.log("user connected", socket.id);
+
+  socket.on("setTrack", (newTerm) => {
+      console.log("new tracking term", newTerm);
+      tweetWatcher.track(newTerm);
+      mySocket.emit("tracking", newTerm);
+      trackingTerm = newTerm;
+  });
+
+  socket.on("getTrack", (callback) => {
+      console.log("tracking", trackingTerm);
+      callback(trackingTerm);
+  });
 
   socket.on("classify", (options, callback) => {
     console.log("classify", options.tweetId, options.class);

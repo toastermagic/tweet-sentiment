@@ -140,7 +140,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         _unTapped: function(e) {
-          e.target.style.zIndex = e.target.zIndex;
+          e.target.style.zIndex = 0;
           e.target.classList.remove("ignore-shuffle");
           // this.$.overlay._hide();
         },
@@ -182,6 +182,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // this.add(tweet.tweet.id_str);
               return;
             });
+        },
+
+        _clear: function() {
+          let count = 0;
+          let packElements = this.packery.items.map((item) => item.element);
+          while(packElements.length > 0) {
+            let removeIndex = Math.floor(Math.random() * packElements.length);
+            let removeElement = packElements.splice(removeIndex, 1)[0];
+            setTimeout(() => {
+              console.log('dismissing', removeElement);
+              removeElement.dismiss(true);
+            }, count++ * 50);
+          }
         },
 
         _shuffle: function(currentTweetId) {
@@ -249,9 +262,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         _removeMe: function(e) {
-          console.log('hidden, ready to remove', e.target);
-          this.packery.remove(e.target);
-          this.packery.layout();
+          console.log('remove', e.target);
+          try
+          {
+            this.packery.remove(e.target);
+            if (!e.detail.noLayout){
+              this.packery.layout();
+            }
+          } catch (err) {
+            console.log('packery issue', err);
+          }
         },
 
         _loaded: function(e) {

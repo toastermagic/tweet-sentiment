@@ -2,10 +2,42 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "0.1.0",
-    "command": "tsc",
+    "command": "gulp",
     "isShellCommand": true,
-    "args": ["-sourcemap", "-w", "-p", "."],
-    "showOutput": "silent",
-    "isWatching": true,
-    "problemMatcher": "$tsc-watch"
+    "args": [
+        "--no-color"
+    ],
+    "tasks": [
+        {
+            "taskName": "default",
+            "args": [],
+            "isBuildCommand": false,
+            "isWatching": false,
+            "problemMatcher": [
+                "$lessCompile",
+                "$tsc",
+                "$jshint"
+            ]
+        },
+        {
+            "taskName": "watch-typescript",
+            "args": [],
+            "isBuildCommand": true,
+            "isWatching": true,
+            "problemMatcher": [
+                "$tsc-watch",
+                "$lessCompile",
+                "$jshint"
+            ]
+        },
+        {
+            "taskName": "lint",
+            "args": [],
+            "isBuildCommand": false,
+            "isWatching": false,
+            "problemMatcher": [
+                "$eslint-stylish"
+            ]
+        }
+    ]
 }

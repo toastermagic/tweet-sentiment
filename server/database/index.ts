@@ -6,14 +6,13 @@ let NodeCouchDb = require("node-couchdb");
 let couch: any = new NodeCouchDb();
 
 export class Database {
-    trainingDb: any;
 
     constructor() {
         console.log("couchdb initialising");
         this.checkDbExists();
     }
 
-    storeTweet(tweet: ITweet) {
+    public storeTweet(tweet: ITweet) {
         couch.uniqid()
             .then(ids => {
                 couch.insert("training", {
@@ -27,7 +26,7 @@ export class Database {
             });
     }
 
-    deleteTweet(tweetId: String) {
+    public deleteTweet(tweetId: String) {
         return new Promise((res, rej) => {
             couch
                 .get("training", "_design/trainingTweets/_view/by_tweetId", { keys: [tweetId] })
@@ -54,7 +53,7 @@ export class Database {
         });
     }
 
-    updateTweet(tweetId: String, classification: String) {
+    public updateTweet(tweetId: String, classification: String) {
         return new Promise((res, rej) => {
             couch
                 .get("training", "_design/trainingTweets/_view/by_tweetId", { keys: [tweetId] })
@@ -85,11 +84,11 @@ export class Database {
         });
     }
 
-    getTweets() {
+    public getTweets() {
         return new Promise((res, rej) => {
             couch.get("training", "_design/trainingTweets/_view/classified")
                 .then((results) => {
-                    var tweets = results.data.rows.map((row) => row.value);
+                    let tweets = results.data.rows.map((row) => row.value);
                     res(tweets);
                 },
                 (err) => {
@@ -98,14 +97,14 @@ export class Database {
         });
     }
 
-    getClassificationCounts() {
+    public getClassificationCounts() {
         return new Promise((res, rej) => {
             couch.get("training", "_design/trainingTweets/_view/count_by_classification", {
-                reduce: true,
-                group_level: 999
+                group_level: 999,
+                reduce: true
             })
                 .then((results) => {
-                    let count = new Object;
+                    let count = new Object();
                     results.data.rows.map((row) => {
                         count[row.key  || "unclassified"] = row.value;
                     });
@@ -117,7 +116,7 @@ export class Database {
         });
     }
 
-    getNextUnclassifiedTweet(lastTweetId?: String) {
+    public getNextUnclassifiedTweet(lastTweetId?: String) {
         return new Promise((res, rej) => {
             let options: any = {
                 limit: 1
@@ -126,7 +125,7 @@ export class Database {
             if (lastTweetId) {
                 options.skip = 1;
                 options.startkey = lastTweetId;
-            };
+            }
 
             couch.get("training", "_design/trainingTweets/_view/unclassified", options)
                 .then((results) => {

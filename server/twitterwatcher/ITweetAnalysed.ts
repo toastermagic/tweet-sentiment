@@ -9,13 +9,13 @@ export interface ITweetAnalysed {
 }
 
 export class TweetAnalysed implements ITweetAnalysed {
+    public tweet: ITweet;
+    public classification: String;
+
+    public output: String;
+    public output_multi: any[];
+
     constructor(tweet: ITweet) {
         this.tweet = tweet;
     }
-
-    tweet: ITweet;
-    classification: String;
-
-    output: String;
-    output_multi: any[];
 }

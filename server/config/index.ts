@@ -1,14 +1,14 @@
 "use strict";
 
 export class Config {
-  port: String = "8080";
-  host: String = "0.0.0.0";
+  public port: String = "8080";
+  public host: String = "0.0.0.0";
 
-  gcloud: any = {
-    projectId: "cloudprediction",
+  public gcloud: any = {
     keyFile: "../../../cloudPredictionServiceAccount.json",
-    namespace: "LabelCat"
+    namespace: "LabelCat",
+    projectId: "cloudprediction"
   };
 
-  twitter: any = require("../../../twitter-config.json");
+  public twitter: any = require("../../../twitter-config.json");
 };

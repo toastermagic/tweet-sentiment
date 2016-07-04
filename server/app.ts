@@ -1,5 +1,4 @@
 /// <reference path="../typings/index.d.ts"/>
-
 "use strict";
 
 import { Config } from "./config";
@@ -7,6 +6,8 @@ import { CloudPredictor } from "./cloudprediction";
 import { ITweet, TweetAnalysed, TwitterWatcher } from "./twitterwatcher";
 import { Database } from "./database";
 import * as socketIo from "socket.io";
+import * as express from "express";
+import * as http from "http";
 
 let config = new Config();
 let PROD = process.env.NODE_ENV === "production";
@@ -14,11 +15,10 @@ let PORT = process.env.PORT || 8000;
 
 //  initialize IOC container
 let container = require("./container");
-let express = require("express");
 
 let db = new Database();
 let app = express();
-let server = require("http").Server(app);
+let server = http.createServer(app);
 let apiMode = "learn";
 
 let staticPath;
@@ -39,8 +39,13 @@ if (PROD) {
 console.log("serving static files from " + staticPath);
 app.use(express.static(staticPath, { maxAge: "1d" }));
 
+//  if it doesn't exist, serve a 404
+app.get("*", (req: express.Request, res: express.Response) => {
+    res.sendStatus(404);
+});
+
 console.log("listening on port " + PORT);
-server.listen(PORT, function (err) {
+server.listen(PORT, function (err: Error) {
   if (err) {
     console.log("express couldn't start", err);
     return;
@@ -53,8 +58,8 @@ if (trackingTerm) {
   tweetWatcher.track(trackingTerm);
 }
 
-
 function pollStatus() {
+  "use strict";
   predictor.getModelById("tweetSentiment")
     .then((result) => {
       let status = result[0];
@@ -81,6 +86,7 @@ function pollStatus() {
 }
 
 function convertTweet(tweet: ITweet): Promise<TweetAnalysed> {
+  "use strict";
   let casted: TweetAnalysed = new TweetAnalysed(tweet);
 
   return new Promise((res, rej) => {
@@ -105,6 +111,7 @@ function convertTweet(tweet: ITweet): Promise<TweetAnalysed> {
 }
 
 function getTimeOfDay(tweet: any): String {
+  "use strict";
   let myDate: Date = new Date(tweet.tweet.created_at.toString());
   let hours: String = "0" + myDate.getHours();
   let minutes: String = "0" + myDate.getMinutes();
@@ -151,14 +158,14 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
 
     db.getTweets().then((tweets: any[]) => {
       let instances = [];
-      var exp = /(\b(https?|ftp|file):\/\/)([-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+      let exp = /(\b(https?|ftp|file):\/\/)([-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 
-      for (var index = 0; index < tweets.length; index++) {
-        var stripped = tweets[index].tweet.text.replace(exp, "");
-        var wordCount = stripped.split(/\s+/).length;
-        var lower = stripped.replace(/[A-Z]/g, "").length;
-        var upper = stripped.replace(/[a-z]/g, "").length;
-        var upperCaseRatio = upper / (upper + lower);
+      for (let index = 0; index < tweets.length; index++) {
+        let stripped = tweets[index].tweet.text.replace(exp, "");
+        let wordCount = stripped.split(/\s+/).length;
+        let lower = stripped.replace(/[A-Z]/g, "").length;
+        let upper = stripped.replace(/[a-z]/g, "").length;
+        let upperCaseRatio = upper / (upper + lower);
 
         let trainingInstance = {
           "csvInstance": [

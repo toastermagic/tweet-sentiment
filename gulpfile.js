@@ -216,69 +216,40 @@ gulp.task('clean', function () {
   return del(['.tmp', dist()]);
 });
 
-// Watch files for changes & reload
-gulp.task('serve', ['styles'], function () {
-  browserSync({
-    port: 5000,
-    notify: false,
-    logPrefix: 'PSK',
-    snippetOptions: {
-      rule: {
-        match: '<span id="browser-sync-binding"></span>',
-        fn: function (snippet) {
-          return snippet;
-        }
-      }
-    },
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
-    server: {
-      baseDir: ['.tmp', 'app'],
-      middleware: [historyApiFallback()]
-    }
-  });
-
-  gulp.watch(['app/**/*.html', '!app/bower_components/**/*.html'], reload);
-  gulp.watch(['app/styles/**/*.css'], ['styles', reload]);
-  gulp.watch(['app/scripts/**/*.js'], reload);
-  gulp.watch(['app/images/**/*'], reload);
-});
-
-// Build and serve the output from the dist build
-gulp.task('serve:dist', ['default'], function () {
-  browserSync({
-    port: 5001,
-    notify: false,
-    logPrefix: 'PSK',
-    snippetOptions: {
-      rule: {
-        match: '<span id="browser-sync-binding"></span>',
-        fn: function (snippet) {
-          return snippet;
-        }
-      }
-    },
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
-    server: dist(),
-    middleware: [historyApiFallback()]
-  });
-});
-
 var ts = require('gulp-typescript');
 var sourcemaps = require('gulp-sourcemaps');
 var tsProject = ts.createProject('tsconfig.json');
-gulp.task('server-typescript', function (cb) {
+gulp.task('server-typescript', ['lint'], function (cb) {
   var tsResult = tsProject.src()
     .pipe(sourcemaps.init()) // This means sourcemaps will be generated 
     .pipe(ts(tsProject));
 
   return tsResult.js.pipe(sourcemaps.write())
     .pipe(gulp.dest(dist('server')));
+});
+
+gulp.task('lint', function (cb) {
+  var tslint = require('gulp-tslint');
+  var stylish = require('tslint-stylish');
+  try {
+    return gulp.src('server/**/*.ts')
+      .pipe(tslint({
+        "extends": "tslint:recommended"
+      }))
+      .pipe(tslint.report(stylish, {
+          sort: true,
+          bell: true,
+          fullPath: true,
+          emitError: false      
+      }));
+  }
+  catch (err) {
+    //  empty
+  }
+});
+
+gulp.task('watch-typescript', ['server-typescript'], function (cb) {
+  gulp.watch(['server/**/*.ts'], ['server-typescript']);
 });
 
 // Build production files, the default task
@@ -291,30 +262,6 @@ gulp.task('default', ['clean'], function (cb) {
     'server-typescript',
     cb);
 });
-
-// Build then deploy to GitHub pages gh-pages branch
-gulp.task('build-deploy-gh-pages', function (cb) {
-  runSequence(
-    'default',
-    'deploy-gh-pages',
-    cb);
-});
-
-// Deploy to GitHub pages gh-pages branch
-gulp.task('deploy-gh-pages', function () {
-  return gulp.src(dist('**/*'))
-    // Check if running task from Travis CI, if so run using GH_TOKEN
-    // otherwise run using ghPages defaults.
-    .pipe($.if(process.env.TRAVIS === 'true', $.ghPages({
-      remoteUrl: 'https://$GH_TOKEN@github.com/polymerelements/polymer-starter-kit.git',
-      silent: true,
-      branch: 'gh-pages'
-    }), $.ghPages()));
-});
-
-// Load tasks for web-component-tester
-// Adds tasks for `gulp test:local` and `gulp test:remote`
-// require('web-component-tester').gulp.init(gulp);
 
 // Load custom tasks from the `tasks` directory
 try {

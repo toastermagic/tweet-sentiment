@@ -2,7 +2,7 @@
 
 import {Config} from "../config";
 
-var dependable = require("dependable");
+let dependable = require("dependable");
 let path = require("path");
 let gcloud = require("gcloud");
 let google = require("googleapis");
@@ -12,10 +12,10 @@ let key;
 try {
   if (process.env.NODE_ENV === "test") {
     key = {
-      private_key_id: "",
-      private_key: "",
       client_email: "",
       client_id: "",
+      private_key: "",
+      private_key_id: "",
       type: "service_account"
     };
   } else {
@@ -23,7 +23,8 @@ try {
   }
 } catch (err) {
   console.error(`Could not read key file! 
-  Did you download one from https://console.developers.google.com/project/${config.gcloud.projectId}/apiui/credential ?`);
+  Did you download one from 
+  https://console.developers.google.com/project/${config.gcloud.projectId}/apiui/credential ?`);
   throw err;
 }
 
@@ -33,7 +34,7 @@ container.register("Promise", function () {
   return require("bluebird");
 });
 
-container.register("request", function (Promise) {
+container.register("request", function (Promise: any) {
   return Promise.promisify(require("request"));
 });
 
@@ -42,16 +43,16 @@ container.register("config", config);
 //  interface for communicating with the GCP DataStore.
 container.register("dataset", function (Promise) {
   return Promise.promisifyAll(gcloud.datastore.dataset({
-    projectId: config.gcloud.projectId,
-    keyFilename: config.gcloud.keyFile
+    keyFilename: config.gcloud.keyFile,
+    projectId: config.gcloud.projectId
   }));
 });
 
 //  interface for communicating with the GCP PubSub.
 container.register("pubsub", function (Promise) {
   return Promise.promisifyAll(gcloud.pubsub({
-    projectId: config.gcloud.projectId,
-    keyFilename: config.gcloud.keyFile
+    keyFilename: config.gcloud.keyFile,
+    projectId: config.gcloud.projectId
   }));
 });
 

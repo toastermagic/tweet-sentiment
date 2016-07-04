@@ -209,11 +209,12 @@ gulp.task("clean", function () {
 });
 
 gulp.task("server-typescript", ["lint"], function () {
-	var tsResult = tsProject.src()
-		.pipe($.sourcemaps.init()) // This means sourcemaps will be generated 
+	var sourcemaps = require("gulp-sourcemaps");
+	var tsResult = tsProject.src({ base: "server" })
+		.pipe(sourcemaps.init()) // This means sourcemaps will be generated 
 		.pipe(ts(tsProject));
 
-	return tsResult.js.pipe($.sourcemaps.write())
+	return tsResult.js.pipe(sourcemaps.write())
 		.pipe(gulp.dest(dist("server")));
 });
 

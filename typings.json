@@ -1,10 +1,12 @@
 {
   "dependencies": {},
   "globalDependencies": {
+    "couchbase": "registry:dt/couchbase#2.1.2+20160317120654",
     "ejs": "registry:dt/ejs#0.0.0+20160317120654",
     "express": "registry:dt/express#4.0.0+20160317120654",
     "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160701212727",
     "form-data": "registry:dt/form-data#0.0.0+20160316155526",
+    "lodash": "registry:dt/lodash#3.10.0+20160619033623",
     "mime": "registry:dt/mime#0.0.0+20160316155526",
     "node": "registry:dt/node#6.0.0+20160621231320",
     "request": "registry:dt/request#0.0.0+20160524135346",

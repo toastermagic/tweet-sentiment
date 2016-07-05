@@ -93,7 +93,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <paper-drawer-panel>
       <paper-header-panel drawer>
-        <paper-toolbar>Menu</paper-toolbar>
+        <paper-toolbar>
+          <img src="images\predictionApiLogo.png" style="height:40px" />
+          <div>&nbsp;Google Prediction API</div>
+        </paper-toolbar>
         <tweet-toolbar on-clear="clear" on-add="add" on-shuffle="shuffle" class="layout vertical" id="tweetbar"></tweet-toolbar>
       </paper-header-panel>
       <!-- Main Area -->
@@ -102,9 +105,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-toolbar id="mainToolbar">
           <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
           <div class="app-name">Tweet Sentiment Analysis</div>
-          <div>&nbsp;with Google Prediction API&nbsp;</div>
-          <img src="images\predictionApiLogo.png" style="height:40px" />
-          <span class="space"></span>
         </paper-toolbar>
 
         <!-- Main Content -->

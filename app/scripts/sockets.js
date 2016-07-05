@@ -1,15 +1,31 @@
 window.tweetSocket = (function (document) {
 	"use strict";
 	var socket = io();
+	var streamSource;
 	var mySocket = {
 		tweetStream: function () {
-			var streamSource = Rx.Observable.create(function (observer) {
+			streamSource = Rx.Observable.create(function (observer) {
 				socket.on("tweet", function (tweet) {
 					observer.onNext(tweet);
 				});
-			});
-			return streamSource.pausable();
+			}).pausable();
+			return streamSource;
 		},
+		pauseTweets: function() {
+			if (streamSource) {
+				streamSource.pause();
+			}
+		},
+		resumeTweets: function() {
+			if (streamSource) {
+				streamSource.resume();
+			}
+		},
+		visibilityStream: Rx.Observable.create(function (observer) {
+			document.addEventListener("pagevis", function(ev) {
+				observer.onNext(ev.detail);
+			});
+		}),
 		statusStream: Rx.Observable.create(function (observer) {
 			socket.on("trainingStatus", function (status) {
 				if (status.status === "ACCEPTED") {

@@ -30,9 +30,15 @@ window.tweetSocket = (function (document) {
 			socket.on("trainingStatus", function (status) {
 				if (status.status === "ACCEPTED") {
 					observer.onNext({
+						training: false,
+						message: status.message
+					});
+				} else if (status.status === "STARTING") {
+					observer.onNext({
 						training: true,
 						message: status.message
 					});
+					// ignore these, there could be a lot of them
 				} else if (status.status === "RUNNING") {
 					// ignore these, there could be a lot of them
 				} else if (status.status === "DONE") {

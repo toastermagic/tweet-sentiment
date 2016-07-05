@@ -5,6 +5,7 @@ import { Config } from "./config";
 import { CloudPredictor } from "./cloudprediction";
 import { ITweet, TweetAnalysed, TwitterWatcher } from "./twitterwatcher";
 import { Database } from "./database";
+
 import * as socketIo from "socket.io";
 import * as express from "express";
 import * as http from "http";
@@ -215,7 +216,7 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
           trainingStart = new Date();
           mySocket.emit("trainingStatus", {
             message: "Training request accepted",
-            status: "ACCEPTED"
+            status: "STARTING"
           });
           setTimeout(() => { pollStatus(); }, 1000);
         },

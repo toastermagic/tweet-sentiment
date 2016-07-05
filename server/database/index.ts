@@ -1,8 +1,9 @@
 "use strict";
 
 import {ITweet} from "../twitterwatcher/ITweet";
+import NodeCouchDb = require("node-couchdb");
+import * as _ from "lodash";
 
-let NodeCouchDb = require("node-couchdb");
 let couch: any = new NodeCouchDb();
 
 export class Database {
@@ -120,11 +121,10 @@ export class Database {
     public getNextUnclassifiedTweet(lastTweetId?: String) {
         return new Promise((res, rej) => {
             let options: any = {
-                limit: 1
+                limit: 2
             };
 
             if (lastTweetId) {
-                options.skip = 1;
                 options.startkey = lastTweetId;
             }
 
@@ -132,8 +132,10 @@ export class Database {
                 .then((results) => {
                     if (results.data.rows.length === 0) {
                         res([]);
-                    } else {
+                    } else if (!lastTweetId) {
                         res(results.data.rows[0].value.tweet);
+                    } else {
+                        res(_(results.data.rows).last().value.tweet);
                     }
                 },
                 (err) => {

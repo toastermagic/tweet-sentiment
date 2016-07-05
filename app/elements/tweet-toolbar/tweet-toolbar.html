@@ -295,9 +295,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let total = 0;
         _(["angry", "irrelevant", "unclassified", "positive", "neutral"])
         .each((classification) => {
+          this.updateCount(classification, newCounts);
           if (classification != "unclassified")
           {
-            this.updateCount(classification, newCounts);
             total += newCounts[classification] || 0;
           }
         })

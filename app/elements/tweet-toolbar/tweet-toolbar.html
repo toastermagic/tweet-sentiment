@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="tweet-toolbar">
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -23,71 +23,142 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 10px;
       }
       
-      paper-button {
-        display: block;
-        margin: 10px;
+      #angryCount {
+        background: rgba(255, 0, 0, 0.5);
+      }
+      
+      #neutralCount {
+        background: rgba(0, 0, 255, 0.5);
+      }
+      
+      #positiveCount {
+        background: rgba(0, 255, 0, 0.5);
       }
       
       paper-input {
-        margin: 10px;
+        margin: 0 10px;
+      }
+      
+      paper-item {
+        --paper-item-disabled-color: #333;
+      }
+      
+      .smallText {
+        margin-left: 5px;
+        float: left;
+      }
+      
+      .sideButton {
+        padding: 10px 15px;
+        margin: 3px 0px;
+      }
+
+      .activeButton {
+        background: rgba(0,255,0,0.2);
+      }
+
+      .countValue {
+        text-align: right;
+        width: 30px;
       }
       
       .count-box {
-        border: 3px solid #ccc;
+        /*border: 3px solid #ccc;*/
         padding: 5px;
-        text-align: center;
+        font-size: smaller;
       }
     </style>
 
+    <paper-item class="layout horizontal">
+      <paper-input class="flex" type="search" label="Search Term" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
+    </paper-item>
 
-    <div class="layout vertical">
-      <paper-button on-tap="clear">
+    <paper-item class="layout horizontal">
+      <paper-button on-tap="clear" class="flex sideButton">
         <iron-icon icon="tweet-icons:clear"></iron-icon>
-        Clear
+        <span class="flex smallText">Clear</span>
       </paper-button>
-
-      <paper-button on-tap="shuffle">
+    </paper-item>
+    <paper-item class="layout horizontal">
+      <paper-button on-tap="shuffle" class="flex sideButton">
         <iron-icon icon="tweet-icons:shuffle"></iron-icon>
-        Shuffle
+        <span class="flex smallText">Shuffle</span>
       </paper-button>
-
-      <paper-button on-tap="add">
+    </paper-item>
+    <paper-item class="layout horizontal">
+      <paper-button on-tap="add" class="flex sideButton">
         <iron-icon icon="tweet-icons:add"></iron-icon>
-        Get Old Tweet
+        <span class="flex smallText">Get Old Tweet</span>
       </paper-button>
+    </paper-item>
 
-      <paper-input type="search" label="Tracking" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
+    <hr style="width:100%"/>
 
-      <paper-button id="unclassifiedCount" title="unclassified" class="count-box">
+    <paper-item disabled="true" class="layout horizontal">
+      <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
         <iron-icon icon="tweet-icons:unknown"></iron-icon>
-        <span>{{counts.unclassified}}</span>
+        <span class="flex smallText">Unclassified</span>
+        <span class="countValue">{{counts.unclassified}}</span>
       </paper-button>
-
-      <paper-button id="positiveCount" title="positive" class="count-box">
-        <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
-        <span>{{counts.positive}}</span>
-      </paper-button>
-      <paper-button id="neutralCount" title="neutral" class="count-box">
-        <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
-        <span>{{counts.neutral}}</span>
-      </paper-button>
-      <paper-button id="angryCount" title="angry" class="count-box">
-        <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
-        <span>{{counts.angry}}</span>
-      </paper-button>
-      <paper-button id="irrelevantCount" title="irrelevant" class="count-box">
+    </paper-item>
+    <paper-item disabled="true" class="layout horizontal">
+      <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
         <iron-icon icon="tweet-icons:delete"></iron-icon>
-        <span>{{counts.irrelevant}}</span>
+        <span class="flex smallText">Irrelevant</span>
+        <span class="countValue">{{counts.irrelevant}}</span>
       </paper-button>
+    </paper-item>
+    <paper-item disabled="true" class="layout horizontal">
+      <paper-button id="positiveCount" title="positive" class="flex sideButton">
+        <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
+        <span class="flex smallText">Positive</span>
+        <span class="countValue">{{counts.positive}}</span>
+      </paper-button>
+    </paper-item>
+    <paper-item disabled="true" class="layout horizontal">
+      <paper-button id="neutralCount" title="neutral" class="flex sideButton">
+        <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
+        <span class="flex smallText">Neutral</span>
+        <span class="countValue">{{counts.neutral}}</span>
+      </paper-button>
+    </paper-item>
+    <paper-item disabled="true" class="layout horizontal">
+      <paper-button id="angryCount" title="angry" class="flex sideButton">
+        <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
+        <span class="flex smallText">Angry</span>
+        <span class="countValue">{{counts.angry}}</span>
+      </paper-button>
+    </paper-item>
+    <paper-item disabled="true" class="layout horizontal">
+      <paper-button id="totalCount" title="total" class="flex sideButton">
+        <iron-icon icon="tweet-icons:check"></iron-icon>
+        <span class="flex smallText">Total</span>
+        <span class="countValue">{{total}}</span>
+      </paper-button>
+    </paper-item>
 
-      <paper-button disabled$="{{training}}" style="background:#0c0" on-tap="train">
+    <hr style="width:100%"/>
+
+    <paper-item class="layout horizontal">
+      <paper-button raised id="trainButton" disabled$="{{training}}" on-tap="train" class="flex sideButton">
         <iron-icon icon="tweet-icons:directions-railway"></iron-icon>
-        <span>Train</span>
+        <span class="flex">Train</span>
       </paper-button>
-
-      <paper-checkbox id="subscribeMode" checked="{{subscribeMode}}">Subscribe</paper-checkbox>
-      <paper-checkbox id="predictMode" checked="{{predictMode}}">Predict</paper-checkbox>
-    </div>
+    </paper-item>
+    <paper-item class="layout horizontal">
+      <paper-button raised toggles active="{{tweetsOn}}" class$="{{isActive(tweetsOn)}} flex sideButton">
+        <iron-icon hidden$="{{!tweetsOn}}" icon="tweet-icons:check"></iron-icon>
+        <iron-icon hidden$="{{tweetsOn}}" icon="tweet-icons:close"></iron-icon>
+        <span class="flex">Live Tweets</span>
+      </paper-button>
+    </paper-item>
+    <paper-item class="layout horizontal">
+      <paper-button raised toggles active="{{predictionsOn}}" class$="{{isActive(predictionsOn)}} flex sideButton">
+        <iron-icon hidden$="{{!predictionsOn}}" icon="tweet-icons:check"></iron-icon>
+        <iron-icon hidden$="{{predictionsOn}}" icon="tweet-icons:close"></iron-icon>
+        <span class="flex">Predictions</span>
+      </paper-button>
+    </paper-item>
 
   </template>
   <script>
@@ -100,15 +171,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       behaviors: [Polymer.NeonAnimationRunnerBehavior],
 
       properties: {
-        predictMode: {
+        tweetsOn: {
           type: Boolean,
           value: false ,
-          observer: '_changePredict'
+          observer: '_changeTweets'
         },
-        subscribeMode: {
+        predictionsOn: {
           type: Boolean,
           value: false,
-          observer: '_changeSubscribe'
+          observer: '_changePredictions'
         },
         tweetStream: Object,
         tweetSubscription: Object,
@@ -121,6 +192,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             angry: '', neutral: '', positive: '', irrelevant: '', unclassified: '' 
           }
         },
+        total: Number,
         prevCounts: {
           type: Object,
           value: {
@@ -141,6 +213,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }                
       },
+      isActive: function (active) {
+        return active ? "activeButton" : "";
+      },      
       checkForEnter: function(e) {
         if (e.keyCode === 13 && this.trackingTerm.length > 2) {
           app.$.toast.text = "Requesting new tracking term:" + this.trackingTerm;
@@ -148,12 +223,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           tweetSocket.sendCommand("setTrack", this.trackingTerm);
         }
       },
-      _changePredict: function(newPredictMode) {
+      _changePredictions: function(newPredictMode) {
         app.$.toast.text = "Setting server to " + (newPredictMode ? "predict" : "learn") + "mode";
         app.$.toast.show();
         tweetSocket.sendCommand("apiMode", newPredictMode ? "predict" : "learn");
       },
-      _changeSubscribe: function(newSubscribed) {
+      _changeTweets: function(newSubscribed) {
           if (newSubscribed) {
             app.$.toast.text = "Starting tweet subscription";
             app.$.toast.show();
@@ -178,11 +253,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
       updateCounts: function(newCounts) {
+        let total = 0;
         _(["angry", "irrelevant", "unclassified", "positive", "neutral"])
         .each((classification) => {
-          this.updateCount(classification, newCounts);
+          if (classification != "unclassified")
+          {
+            this.updateCount(classification, newCounts);
+            total += newCounts[classification];
+          }
         })
         this.counts = newCounts;
+        this.total = total;
       },
       ready: function() {
         this.tweetStream = tweetSocket.tweetStream();

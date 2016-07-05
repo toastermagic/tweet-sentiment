@@ -4,5 +4,4 @@ bower_components
 .tmp
 .publish/
 typings/
-cloudPredictionServiceAccount.json
-twitter-config.json
+server/config/*.json

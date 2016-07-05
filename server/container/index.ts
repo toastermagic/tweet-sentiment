@@ -19,7 +19,7 @@ try {
       type: "service_account"
     };
   } else {
-    key = require(config.gcloud.keyFile);
+    key = config.gcloud.keyFile;
   }
 } catch (err) {
   console.error(`Could not read key file! 

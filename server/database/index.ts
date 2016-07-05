@@ -14,6 +14,7 @@ export class Database {
     }
 
     public storeTweet(trackingTerm: String, tweet: ITweet) {
+        return new Promise((res, rej) => {
         couch.uniqid()
             .then(ids => {
                 couch.insert("training", {
@@ -21,11 +22,12 @@ export class Database {
                     tweet,
                     trackingTerm
                 }).then((result) => {
-                    // console.log("training data stored");
+                    res("training data stored");
                 }, err => {
-                    console.log("could not add training data", err);
+                    rej("could not add training data");
                 });
             });
+        });
     }
 
     public deleteTweet(tweetId: String) {

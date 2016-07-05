@@ -142,6 +142,16 @@ function getTimeOfDay(tweet: any): String {
   return hours.substr(hours.length - 2) + ":" + minutes.substr(minutes.length - 2);
 }
 
+
+function emitCounts() {
+  db.getClassificationCounts()
+    .then((counts) => {
+      console.log("counted", counts);
+      //  outside socket scope, so this is a broadcast message
+      mySocket.emit("counts", counts);
+    });
+}
+
 mySocket.on("connection", (socket: SocketIO.Socket) => {
   console.log("user connected", socket.id);
 
@@ -160,21 +170,12 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
   socket.on("classify", (options, callback) => {
     console.log("classify", options.tweetId, options.class);
     db.updateTweet(options.tweetId, options.class)
-      .then(() => {
-        db.getClassificationCounts()
-          .then((counts) => {
-            socket.emit("counts", counts);
-          });
-      });
+      .then(() => emitCounts());
   });
 
   socket.on("counts", () => {
     console.log("counts");
-    db.getClassificationCounts()
-      .then((counts) => {
-        console.log("counted", counts);
-        socket.emit("counts", counts);
-      });
+    emitCounts();
   });
 
   socket.on("train", () => {
@@ -263,7 +264,14 @@ tweetWatcher.on("tweet", (tweet: ITweet) => {
   }
 
   console.log(new Date(), tweet.text);
-  db.storeTweet(trackingTerm, tweet);
+  db.storeTweet(trackingTerm, tweet)
+    .then((status) => {
+      console.log(status, "emitting counts");
+      emitCounts();
+    })
+    .catch((err: Error) => {
+      console.log("failed storing new tweet", err.message);
+    });
 
   convertTweet(tweet)
     .then((newTweet) => mySocket.emit("tweet", newTweet));

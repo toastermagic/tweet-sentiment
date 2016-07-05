@@ -8,6 +8,7 @@ import { Database } from "./database";
 import * as socketIo from "socket.io";
 import * as express from "express";
 import * as http from "http";
+import ejs = require("ejs");
 
 let config = new Config();
 let PROD = process.env.NODE_ENV === "production";
@@ -29,15 +30,34 @@ let predictor = new CloudPredictor(null, config, container);
 
 let trainingStart = new Date();
 
-process.on("uncaughtException", (err: Error) => {
-  console.log("Uncaught exception:", err);
-});
-
 if (PROD) {
   staticPath = __dirname + "/../../dist/";
 } else {
   staticPath = __dirname + "/../../app/";
 }
+
+//  we need a view engine because we want to inject our configs into the client side html
+app.set("view engine", "ejs");
+
+//  this next line allows us to render using ejs whilst using a .js file extension 
+app.engine("js", ejs.renderFile);
+
+//  this line tells us where to find the views
+app.set("views", staticPath);
+
+process.on("uncaughtException", (err: Error) => {
+  console.log("Uncaught exception:", err);
+});
+
+//  special case where we want to inject our apikeys
+app.get("/scripts/app.js",
+    (req, res) => {
+        res.render("scripts/app.js", {
+            firebaseApiKey: config.firebase.apiKey,
+            firebaseDomain: config.firebase.authDomain,
+            firebaseUrl: config.firebase.databaseURL
+        });
+    });
 
 //  serve all other requests for files that exist
 console.log("serving static files from " + staticPath);

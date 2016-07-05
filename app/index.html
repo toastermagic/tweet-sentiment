@@ -65,7 +65,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <!-- endbuild -->
 
   <!-- build:js scripts/pageVsibility.js -->
-  <script src="scripts/pageVsibility.js"></script>
+  <script src="scripts/pageVisibility.js"></script>
   <!-- endbuild -->
 
   <!-- build:js scripts/sockets.js -->
@@ -90,21 +90,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <body unresolved>
   <template is="dom-bind" id="app">
-
     <paper-drawer-panel>
-      <paper-header-panel drawer>
-        <paper-toolbar>
-          <img src="images\predictionApiLogo.png" style="height:40px" />
-          <div>&nbsp;Google Prediction API</div>
-        </paper-toolbar>
-        <tweet-toolbar on-clear="clear" on-add="add" on-shuffle="shuffle" class="layout vertical" id="tweetbar"></tweet-toolbar>
-      </paper-header-panel>
+        <paper-header-panel drawer>
+          <paper-toolbar>
+            <firebase-app api-key="[[config.firebase.apiKey]]" auth-domain="[[config.firebase.domain]]" database-url="[[config.firebase.url]]"></firebase-app>
+            <firebase-login user="{{user}}"></firebase-login>
+          </paper-toolbar>
+          <tweet-toolbar class="layout vertical" on-clear="clear" on-add="add" on-shuffle="shuffle" id="tweetbar">
+        </paper-header-panel>
+      </tweet-toolbar>
       <!-- Main Area -->
       <paper-header-panel main id="headerPanelMain">
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar">
           <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
-          <div class="app-name">Tweet Sentiment Analysis</div>
+          <div class="app-name flex">Tweet Sentiment Analysis</div>
+          <div>Google Prediction API&nbsp;</div>
+          <img src="images\predictionApiLogo.png" style="height:40px" />
         </paper-toolbar>
 
         <!-- Main Content -->

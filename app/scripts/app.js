@@ -20,13 +20,23 @@
 		app.$.tweetList._clear();
 	};
 
+	//  these values are needed on the client side and will be injected by the server
+	app.config = {
+		firebase: {
+			apiKey: "<%=firebaseApiKey%>",
+			domain: "<%=firebaseDomain%>",
+			url: "<%=firebaseUrl%>"
+		}
+	};
+    
 	tweetSocket.visibilityStream.subscribe(function (newVisibility) {
 		console.log("window visibility event", newVisibility);
 		//	there are also blur and focus events, but we don't care for them
 		if (newVisibility === "hidden") {
-			tweetSocket.pauseTweets();			
-		} else if (newVisibility ==="visible") {
-			tweetSocket.resumeTweets();			
+			tweetSocket.pauseTweets();
+		} else if (newVisibility === "visible") {
+			tweetSocket.resumeTweets();
+			app.shuffle();
 		}
 	});
 

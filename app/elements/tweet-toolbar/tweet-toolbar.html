@@ -62,10 +62,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         -moz-animation: spin 4s linear infinite;
         animation: spin 4s linear infinite;
       }
-      @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
-      @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
-      @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
-
+      
+      @-moz-keyframes spin {
+        100% {
+          -moz-transform: rotate(360deg);
+        }
+      }
+      
+      @-webkit-keyframes spin {
+        100% {
+          -webkit-transform: rotate(360deg);
+        }
+      }
+      
+      @keyframes spin {
+        100% {
+          -webkit-transform: rotate(360deg);
+          transform: rotate(360deg);
+        }
+      }
+      
       .countValue {
         text-align: right;
         width: 30px;
@@ -78,97 +94,99 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <paper-item class="layout horizontal">
-      <paper-input class="flex" type="search" label="Search Term" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
-    </paper-item>
+    <toolbar-items>
+      <paper-item class="layout horizontal">
+        <paper-input class="flex" type="search" label="Search Term" on-keydown="checkForEnter" value="{{trackingTerm}}"></paper-input>
+      </paper-item>
 
-    <paper-item class="layout horizontal">
-      <paper-button on-tap="clear" class="flex sideButton">
-        <iron-icon icon="tweet-icons:clear"></iron-icon>
-        <span class="flex smallText">Clear</span>
-      </paper-button>
-    </paper-item>
-    <paper-item class="layout horizontal">
-      <paper-button on-tap="shuffle" class="flex sideButton">
-        <iron-icon icon="tweet-icons:shuffle"></iron-icon>
-        <span class="flex smallText">Shuffle</span>
-      </paper-button>
-    </paper-item>
-    <paper-item class="layout horizontal">
-      <paper-button on-tap="add" class="flex sideButton">
-        <iron-icon icon="tweet-icons:add"></iron-icon>
-        <span class="flex smallText">Get Old Tweet</span>
-      </paper-button>
-    </paper-item>
+      <paper-item class="layout horizontal">
+        <paper-button on-tap="clear" class="flex sideButton">
+          <iron-icon icon="tweet-icons:clear"></iron-icon>
+          <span class="flex smallText">Clear</span>
+        </paper-button>
+      </paper-item>
+      <paper-item class="layout horizontal">
+        <paper-button on-tap="shuffle" class="flex sideButton">
+          <iron-icon icon="tweet-icons:shuffle"></iron-icon>
+          <span class="flex smallText">Shuffle</span>
+        </paper-button>
+      </paper-item>
+      <paper-item class="layout horizontal">
+        <paper-button on-tap="add" class="flex sideButton">
+          <iron-icon icon="tweet-icons:add"></iron-icon>
+          <span class="flex smallText">Get Old Tweet</span>
+        </paper-button>
+      </paper-item>
 
-    <hr style="width:100%" />
+      <hr style="width:100%" />
 
-    <paper-item disabled="true" class="layout horizontal">
-      <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
-        <iron-icon icon="tweet-icons:unknown"></iron-icon>
-        <span class="flex smallText">Unclassified</span>
-        <span class="countValue">{{counts.unclassified}}</span>
-      </paper-button>
-    </paper-item>
-    <paper-item disabled="true" class="layout horizontal">
-      <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
-        <iron-icon icon="tweet-icons:delete"></iron-icon>
-        <span class="flex smallText">Irrelevant</span>
-        <span class="countValue">{{counts.irrelevant}}</span>
-      </paper-button>
-    </paper-item>
-    <paper-item disabled="true" class="layout horizontal">
-      <paper-button id="positiveCount" title="positive" class="flex sideButton">
-        <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
-        <span class="flex smallText">Positive</span>
-        <span class="countValue">{{counts.positive}}</span>
-      </paper-button>
-    </paper-item>
-    <paper-item disabled="true" class="layout horizontal">
-      <paper-button id="neutralCount" title="neutral" class="flex sideButton">
-        <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
-        <span class="flex smallText">Neutral</span>
-        <span class="countValue">{{counts.neutral}}</span>
-      </paper-button>
-    </paper-item>
-    <paper-item disabled="true" class="layout horizontal">
-      <paper-button id="angryCount" title="angry" class="flex sideButton">
-        <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
-        <span class="flex smallText">Angry</span>
-        <span class="countValue">{{counts.angry}}</span>
-      </paper-button>
-    </paper-item>
-    <paper-item disabled="true" class="layout horizontal">
-      <paper-button id="totalCount" title="total" class="flex sideButton">
-        <iron-icon icon="tweet-icons:check"></iron-icon>
-        <span class="flex smallText">Total</span>
-        <span class="countValue">{{total}}</span>
-      </paper-button>
-    </paper-item>
+      <paper-item disabled="true" class="layout horizontal">
+        <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
+          <iron-icon icon="tweet-icons:unknown"></iron-icon>
+          <span class="flex smallText">Unclassified</span>
+          <span class="countValue">{{counts.unclassified}}</span>
+        </paper-button>
+      </paper-item>
+      <paper-item disabled="true" class="layout horizontal">
+        <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
+          <iron-icon icon="tweet-icons:delete"></iron-icon>
+          <span class="flex smallText">Irrelevant</span>
+          <span class="countValue">{{counts.irrelevant}}</span>
+        </paper-button>
+      </paper-item>
+      <paper-item disabled="true" class="layout horizontal">
+        <paper-button id="positiveCount" title="positive" class="flex sideButton">
+          <iron-icon icon="tweet-icons:thumb-up"></iron-icon>
+          <span class="flex smallText">Positive</span>
+          <span class="countValue">{{counts.positive}}</span>
+        </paper-button>
+      </paper-item>
+      <paper-item disabled="true" class="layout horizontal">
+        <paper-button id="neutralCount" title="neutral" class="flex sideButton">
+          <iron-icon icon="tweet-icons:thumbs-up-down"></iron-icon>
+          <span class="flex smallText">Neutral</span>
+          <span class="countValue">{{counts.neutral}}</span>
+        </paper-button>
+      </paper-item>
+      <paper-item disabled="true" class="layout horizontal">
+        <paper-button id="angryCount" title="angry" class="flex sideButton">
+          <iron-icon icon="tweet-icons:thumb-down"></iron-icon>
+          <span class="flex smallText">Angry</span>
+          <span class="countValue">{{counts.angry}}</span>
+        </paper-button>
+      </paper-item>
+      <paper-item disabled="true" class="layout horizontal">
+        <paper-button id="totalCount" title="total" class="flex sideButton">
+          <iron-icon icon="tweet-icons:check"></iron-icon>
+          <span class="flex smallText">Total</span>
+          <span class="countValue">{{total}}</span>
+        </paper-button>
+      </paper-item>
 
-    <hr style="width:100%" />
+      <hr style="width:100%" />
 
-    <paper-item class="layout horizontal">
-      <paper-button raised id="trainButton" disabled$="{{training}}" on-tap="train" class="flex sideButton">
-        <iron-icon icon="tweet-icons:settings" class$="{{isTraining(training)}}"></iron-icon>
-        <span hidden$="{{training}}" class="flex">Train</span>
-        <span hidden$="{{!training}}" class="flex">Training...</span>
-      </paper-button>
-    </paper-item>
-    <paper-item class="layout horizontal">
-      <paper-button raised toggles active="{{tweetsOn}}" class$="{{isActive(tweetsOn)}} flex sideButton">
-        <iron-icon hidden$="{{!tweetsOn}}" icon="tweet-icons:check"></iron-icon>
-        <iron-icon hidden$="{{tweetsOn}}" icon="tweet-icons:close"></iron-icon>
-        <span class="flex">Live Tweets</span>
-      </paper-button>
-    </paper-item>
-    <paper-item class="layout horizontal">
-      <paper-button raised toggles active="{{predictionsOn}}" class$="{{isActive(predictionsOn)}} flex sideButton">
-        <iron-icon hidden$="{{!predictionsOn}}" icon="tweet-icons:check"></iron-icon>
-        <iron-icon hidden$="{{predictionsOn}}" icon="tweet-icons:close"></iron-icon>
-        <span class="flex">Predictions</span>
-      </paper-button>
-    </paper-item>
+      <paper-item class="layout horizontal">
+        <paper-button raised id="trainButton" disabled$="{{training}}" on-tap="train" class="flex sideButton">
+          <iron-icon icon="tweet-icons:settings" class$="{{isTraining(training)}}"></iron-icon>
+          <span hidden$="{{training}}" class="flex">Train</span>
+          <span hidden$="{{!training}}" class="flex">Training...</span>
+        </paper-button>
+      </paper-item>
+      <paper-item class="layout horizontal">
+        <paper-button raised toggles active="{{tweetsOn}}" class$="{{isActive(tweetsOn)}} flex sideButton">
+          <iron-icon hidden$="{{!tweetsOn}}" icon="tweet-icons:check"></iron-icon>
+          <iron-icon hidden$="{{tweetsOn}}" icon="tweet-icons:close"></iron-icon>
+          <span class="flex">Live Tweets</span>
+        </paper-button>
+      </paper-item>
+      <paper-item class="layout horizontal">
+        <paper-button raised toggles active="{{predictionsOn}}" class$="{{isActive(predictionsOn)}} flex sideButton">
+          <iron-icon hidden$="{{!predictionsOn}}" icon="tweet-icons:check"></iron-icon>
+          <iron-icon hidden$="{{predictionsOn}}" icon="tweet-icons:close"></iron-icon>
+          <span class="flex">Predictions</span>
+        </paper-button>
+      </paper-item>
+    </toolbar-items>
 
   </template>
   <script>

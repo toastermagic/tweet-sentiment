@@ -1,0 +1,117 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="..\..\bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="..\..\bower_components/polymerfire/polymerfire.html">
+
+<dom-module id="firebase-login">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      
+      paper-dropdown-menu#signIn::shadow paper-input-container {
+        color: white;
+      }
+      
+      paper-fab.profileImageFab::shadow iron-icon {
+        width: 40px;
+        height: 40px;
+      }
+
+      paper-fab.profileImageFab::shadow img {
+        border-radius: 50%;
+      }
+    </style>
+
+    <firebase-auth id="auth" user="{{user}}" provider="google" signed-in="{{signedIn}}" on-error="handleError">
+    </firebase-auth>
+
+    <div hidden$="{{signedIn}}" style="display:flex; flex-direction:row">
+      <paper-dropdown-menu id="signIn" label="Sign In:">
+        <paper-listbox class="dropdown-content">
+          <paper-item on-tap="loginGoogle">
+            <img src="/images/loginWithGoogle.png" style="width:200px" />
+          </paper-item>
+          <paper-item on-tap="loginFacebook" disabled="true">            
+            <img src="/images/facebook-login.png" style="width:200px" />
+          </paper-item>
+          <paper-item on-tap="loginTwitter" disabled="true">
+            <img src="/images/twitter-login.png" style="width:200px" />
+          </paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu>
+    </div>
+
+    <div hidden$="{{!signedIn}}" style="display:flex; flex-direction:row">
+      <paper-item>{{user.displayName}}</paper-item>
+      <paper-fab mini class="profileImageFab" src="{{user.photoURL}}" on-click="logout"></paper-fab>
+    </div>
+
+  </template>
+  <script>
+  (function() {
+    'use strict';
+    Polymer({
+      is: 'firebase-login',
+
+      properties: {
+        user: {
+          type: Object,
+          notify: true      
+        }
+      },
+
+      loginTwitter: function() {
+        this.$.auth.provider="twitter";
+        this.login();
+      },
+
+      loginFacebook: function() {
+        this.$.auth.provider = "facebook";
+        this.login();
+      },
+
+      loginGoogle: function() {
+        this.$.auth.provider = "google";
+        this.login();
+      },
+
+      login: function( ){
+        var self = this;
+        this.$.auth.signInWithPopup()
+          .then(function(response) {
+            response.user.token = response.credential.idToken;
+            self.user = response.user;
+
+            app.$.toast.text = "Login Successful";
+            app.$.toast.show();
+          })
+          .catch(function(error) {
+            // unsuccessful authentication response here
+            console.log('error', error);
+          });
+      },
+
+      logout: function() {
+        this.$.auth.signOut();
+      },
+
+      handleError: function(err) {
+          app.$.toast.text = 'Login failed :(';
+          app.$.toast.show();      
+      }
+    });
+  })();
+  </script>
+</dom-module>

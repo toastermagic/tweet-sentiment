@@ -10,7 +10,8 @@
     "polymer": "Polymer/polymer#^1.2.0",
     "packery": "^2.1.1",
     "underscore": "^1.8.3",
-    "rxjs": "^4.1.0"
+    "rxjs": "^4.1.0",
+    "polymerfire": "^0.9.3"
   },
   "devDependencies": {},
   "ignore": []

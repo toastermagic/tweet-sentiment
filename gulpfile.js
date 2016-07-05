@@ -208,7 +208,12 @@ gulp.task("clean", function () {
 	return del(["server/**/*.js.map", ".tmp", dist()]);
 });
 
-gulp.task("server-typescript", function () {
+gulp.task("copy-json-config", function() {
+	return gulp.src("server/config/*.json")
+		.pipe(gulp.dest(dist("server/config")));
+});
+
+gulp.task("server-typescript", ["copy-json-config"], function () {
 	// return tsProject.src()
 	// 	.pipe(ts(tsProject))
 	// 	.pipe(gulp.dest(dist("server")));

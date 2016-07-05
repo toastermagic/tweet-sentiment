@@ -46,10 +46,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .hoverWrapper {
         position: relative;
       }
-      
+
+      .spinner-container {
+        position:absolute;
+        width:250px;
+        height:300px;
+      }
+
       paper-spinner {
-        position: absolute;
-        top: 100px;
       }
       
       paper-fab {
@@ -89,8 +93,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transform: scale(1.05, 1.05);
       }
     </style>
-    <div id="spinnerContainer" class="layout vertical center">
-      <paper-spinner active="{{loading}}"></paper-spinner>
+
+
+    <div class="spinner-container layout horizontal center">
+      <div class="flex"></div>
+        <paper-spinner active="{{loading}}"></paper-spinner>
+      <div class="flex"></div>
     </div>
 
     <div id="wrapper">

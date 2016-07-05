@@ -8,14 +8,14 @@ import { Database } from "./database";
 import * as socketIo from "socket.io";
 import * as express from "express";
 import * as http from "http";
-import ejs = require("ejs");
+import * as ejs from "ejs";
 
 let config = new Config();
 let PROD = process.env.NODE_ENV === "production";
 let PORT = process.env.PORT || 8000;
 
 //  initialize IOC container
-let container = require("./container");
+import container = require("./container");
 
 let db = new Database();
 let app = express();
@@ -51,13 +51,13 @@ process.on("uncaughtException", (err: Error) => {
 
 //  special case where we want to inject our apikeys
 app.get("/scripts/app.js",
-    (req, res) => {
-        res.render("scripts/app.js", {
-            firebaseApiKey: config.firebase.apiKey,
-            firebaseDomain: config.firebase.authDomain,
-            firebaseUrl: config.firebase.databaseURL
-        });
+  (req, res) => {
+    res.render("scripts/app.js", {
+      firebaseApiKey: config.firebase.apiKey,
+      firebaseDomain: config.firebase.authDomain,
+      firebaseUrl: config.firebase.databaseURL
     });
+  });
 
 //  serve all other requests for files that exist
 console.log("serving static files from " + staticPath);
@@ -65,7 +65,7 @@ app.use(express.static(staticPath, { maxAge: "1d" }));
 
 //  if it doesn't exist, serve a 404
 app.get("*", (req: express.Request, res: express.Response) => {
-    res.sendStatus(404);
+  res.sendStatus(404);
 });
 
 console.log("listening on port " + PORT);
@@ -145,15 +145,15 @@ mySocket.on("connection", (socket: SocketIO.Socket) => {
   console.log("user connected", socket.id);
 
   socket.on("setTrack", (newTerm) => {
-      console.log("new tracking term", newTerm);
-      tweetWatcher.track(newTerm);
-      mySocket.emit("tracking", newTerm);
-      trackingTerm = newTerm;
+    console.log("new tracking term", newTerm);
+    tweetWatcher.track(newTerm);
+    mySocket.emit("tracking", newTerm);
+    trackingTerm = newTerm;
   });
 
   socket.on("getTrack", (callback) => {
-      console.log("tracking", trackingTerm);
-      callback(trackingTerm);
+    console.log("tracking", trackingTerm);
+    callback(trackingTerm);
   });
 
   socket.on("classify", (options, callback) => {

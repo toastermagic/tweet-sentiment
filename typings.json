@@ -1,6 +1,7 @@
 {
   "dependencies": {},
   "globalDependencies": {
+    "ejs": "registry:dt/ejs#0.0.0+20160317120654",
     "express": "registry:dt/express#4.0.0+20160317120654",
     "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160701212727",
     "form-data": "registry:dt/form-data#0.0.0+20160316155526",

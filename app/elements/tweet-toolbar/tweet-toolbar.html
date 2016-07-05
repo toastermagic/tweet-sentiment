@@ -52,10 +52,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 10px 15px;
         margin: 3px 0px;
       }
-
+      
       .activeButton {
-        background: rgba(0,255,0,0.2);
+        background: rgba(0, 255, 0, 0.2);
       }
+      
+      .activeTraining {
+        -webkit-animation: spin 4s linear infinite;
+        -moz-animation: spin 4s linear infinite;
+        animation: spin 4s linear infinite;
+      }
+      @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+      @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+      @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
       .countValue {
         text-align: right;
@@ -92,7 +101,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </paper-button>
     </paper-item>
 
-    <hr style="width:100%"/>
+    <hr style="width:100%" />
 
     <paper-item disabled="true" class="layout horizontal">
       <paper-button id="irrelevantCount" title="irrelevant" class="flex sideButton">
@@ -137,12 +146,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </paper-button>
     </paper-item>
 
-    <hr style="width:100%"/>
+    <hr style="width:100%" />
 
     <paper-item class="layout horizontal">
       <paper-button raised id="trainButton" disabled$="{{training}}" on-tap="train" class="flex sideButton">
-        <iron-icon icon="tweet-icons:directions-railway"></iron-icon>
-        <span class="flex">Train</span>
+        <iron-icon icon="tweet-icons:settings" class$="{{isTraining(training)}}"></iron-icon>
+        <span hidden$="{{training}}" class="flex">Train</span>
+        <span hidden$="{{!training}}" class="flex">Training...</span>
       </paper-button>
     </paper-item>
     <paper-item class="layout horizontal">
@@ -199,7 +209,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             angry: '', neutral: '', positive: '', irrelevant: '', unclassified: '' 
           }
         },
-        training: Boolean,
+        training: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
         trackingTerm: {
           type: String,
           notify: true
@@ -215,6 +229,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       isActive: function (active) {
         return active ? "activeButton" : "";
+      },      
+      isTraining: function (isTraining) {
+        return isTraining ? "activeTraining" : "";
       },      
       checkForEnter: function(e) {
         if (e.keyCode === 13 && this.trackingTerm.length > 2) {

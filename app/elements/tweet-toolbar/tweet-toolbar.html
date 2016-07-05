@@ -259,7 +259,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (classification != "unclassified")
           {
             this.updateCount(classification, newCounts);
-            total += newCounts[classification];
+            total += newCounts[classification] || 0;
           }
         })
         this.counts = newCounts;

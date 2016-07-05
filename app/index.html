@@ -96,7 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <firebase-app api-key="[[config.firebase.apiKey]]" auth-domain="[[config.firebase.domain]]" database-url="[[config.firebase.url]]"></firebase-app>
             <firebase-login user="{{user}}"></firebase-login>
           </paper-toolbar>
-          <tweet-toolbar class="layout vertical" on-clear="clear" on-add="add" on-shuffle="shuffle" id="tweetbar">
+          <tweet-toolbar user="{{user}}" class="layout vertical" on-clear="clear" on-add="add" on-shuffle="shuffle" id="tweetbar">
         </paper-header-panel>
       </tweet-toolbar>
       <!-- Main Area -->

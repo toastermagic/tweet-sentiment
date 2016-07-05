@@ -162,16 +162,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <span class="countValue">{{total}}</span>
         </paper-button>
       </paper-item>
-
-      <hr style="width:100%" />
-
-      <paper-item class="layout horizontal">
-        <paper-button raised id="trainButton" disabled$="{{training}}" on-tap="train" class="flex sideButton">
+      <paper-item class="layout horizontal" disabled="{{training}}">
+        <paper-button raised id="trainButton" disabled="[[!user]]" on-tap="train" class="flex sideButton">
           <iron-icon icon="tweet-icons:settings" class$="{{isTraining(training)}}"></iron-icon>
           <span hidden$="{{training}}" class="flex">Train</span>
           <span hidden$="{{!training}}" class="flex">Training...</span>
         </paper-button>
       </paper-item>
+
+      <hr style="width:100%" />
+
       <paper-item class="layout horizontal">
         <paper-button raised toggles active="{{tweetsOn}}" class$="{{isActive(tweetsOn)}} flex sideButton">
           <iron-icon hidden$="{{!tweetsOn}}" icon="tweet-icons:check"></iron-icon>
@@ -180,7 +180,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-button>
       </paper-item>
       <paper-item class="layout horizontal">
-        <paper-button raised toggles active="{{predictionsOn}}" class$="{{isActive(predictionsOn)}} flex sideButton">
+        <paper-button raised toggles active="{{predictionsOn}}" disabled="[[!user]]" class$="{{isActive(predictionsOn)}} flex sideButton">
           <iron-icon hidden$="{{!predictionsOn}}" icon="tweet-icons:check"></iron-icon>
           <iron-icon hidden$="{{predictionsOn}}" icon="tweet-icons:close"></iron-icon>
           <span class="flex">Predictions</span>
@@ -203,6 +203,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false ,
           observer: '_changeTweets'
+        },
+        user: {
+          type: Object,
+          notify: true
         },
         predictionsOn: {
           type: Boolean,

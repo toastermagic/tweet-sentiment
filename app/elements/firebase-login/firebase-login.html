@@ -93,8 +93,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .then(function(response) {
             response.user.token = response.credential.idToken;
             self.user = response.user;
-
-            app.$.toast.text = "Login Successful";
+            app.$.toast.text = "Logged in as" + response.user.displayName;
             app.$.toast.show();
           })
           .catch(function(error) {

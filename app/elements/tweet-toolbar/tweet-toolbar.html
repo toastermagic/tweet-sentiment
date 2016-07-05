@@ -46,6 +46,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .smallText {
         margin-left: 5px;
         float: left;
+        font-size: smaller;
       }
       
       .sideButton {
@@ -63,6 +64,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         animation: spin 4s linear infinite;
       }
       
+      #getTweetButton {
+        min-width: unset;
+        width: 40px;
+      }
+
       @-moz-keyframes spin {
         100% {
           -moz-transform: rotate(360deg);
@@ -111,20 +117,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <span class="flex smallText">Shuffle</span>
         </paper-button>
       </paper-item>
-      <paper-item class="layout horizontal">
-        <paper-button on-tap="add" class="flex sideButton">
-          <iron-icon icon="tweet-icons:add"></iron-icon>
-          <span class="flex smallText">Get Old Tweet</span>
-        </paper-button>
-      </paper-item>
 
       <hr style="width:100%" />
 
-      <paper-item disabled="true" class="layout horizontal">
-        <paper-button id="unclassifiedCount" title="irrelevant" class="flex sideButton">
+      <paper-item class="layout horizontal">
+        <paper-button disabled="true" id="unclassifiedCount" title="irrelevant" class="flex sideButton">
           <iron-icon icon="tweet-icons:unknown"></iron-icon>
           <span class="flex smallText">Unclassified</span>
-          <span class="countValue">{{counts.unclassified}}</span>
+        </paper-button>
+        <paper-button id="getTweetButton" on-tap="add" raised>
+          <span style="text-align: right">{{counts.unclassified}}</span>
         </paper-button>
       </paper-item>
       <paper-item disabled="true" class="layout horizontal">

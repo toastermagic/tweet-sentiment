@@ -13,20 +13,78 @@ export class Database {
         this.checkDbExists();
     }
 
+    public storeUserProfile(user: any) {
+        return new Promise((res, rej) => {
+            couch.uniqid()
+                .then(ids => {
+                    couch.insert("training", {
+                        _id: ids[0],
+                        _key: user.uid,
+                        user,
+                        eventTime: new Date().toUTCString()
+                    }).then((result) => {
+                        res("training data stored");
+                    }, err => {
+                        rej("could not add training data");
+                    });
+                });
+        });
+    }
+
+    public storeAuthEvent(authEvent: any) {
+        let p2 = new Promise((res, rej) => {
+            couch.uniqid()
+                .then(ids => {
+                    couch.insert("training", {
+                        _id: ids[0],
+                        _key: authEvent.uid,
+                        event: authEvent.event,
+                        eventTime: new Date().toUTCString(),
+                        uid: authEvent.uid
+                    }).then((result) => {
+                        res("authEvent stored");
+                    }, err => {
+                        rej("could not store authEvent");
+                    });
+                });
+        });
+        if (authEvent.event === "login") {
+            return new Promise((res, rej) => {
+                couch
+                    .get("training", "_design/trainingTweets/_view/user_by_uid", { keys: [authEvent.uid] })
+                    .then((result) => {
+                        if (result.data.rows.length === 0) {
+                            //  first login, let's store the user profile
+                            this.storeUserProfile(authEvent.user)
+                                .then(() => {
+                                    res("new user profile stored");
+                                }, err => {
+                                    rej("could not user profile");
+                                });
+                        }
+                    });
+            }).then(() => p2);
+        }
+        else {
+            return p2;
+        }
+    }
+
+
     public storeTweet(trackingTerm: String, tweet: ITweet) {
         return new Promise((res, rej) => {
-        couch.uniqid()
-            .then(ids => {
-                couch.insert("training", {
-                    _id: ids[0],
-                    tweet,
-                    trackingTerm
-                }).then((result) => {
-                    res("training data stored");
-                }, err => {
-                    rej("could not add training data");
+            couch.uniqid()
+                .then(ids => {
+                    couch.insert("training", {
+                        _id: ids[0],
+                        tweet,
+                        trackingTerm
+                    }).then((result) => {
+                        res("training data stored");
+                    }, err => {
+                        rej("could not add training data");
+                    });
                 });
-            });
         });
     }
 
@@ -168,7 +226,10 @@ export class Database {
                         },
                         "classified": {
                             "map": "function(doc) { if (doc.tweet && doc.classification) emit(null, doc);}"
-                        }
+                        },
+                        "user_by_uid": {
+                            "map": "function(doc) { if (doc.user && doc.uid) emit(doc.uid, doc);}"
+                        },
                     }
                 }).then((result) => {
                     console.log("design views created");

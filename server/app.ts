@@ -146,7 +146,6 @@ function getTimeOfDay(tweet: any): String {
 function emitCounts() {
   db.getClassificationCounts()
     .then((counts) => {
-      console.log("counted", counts);
       //  outside socket scope, so this is a broadcast message
       mySocket.emit("counts", counts);
     });
@@ -154,6 +153,17 @@ function emitCounts() {
 
 mySocket.on("connection", (socket: SocketIO.Socket) => {
   console.log("user connected", socket.id);
+
+  socket.on("authEvent", (authEvent) => {
+    console.log("authEvent", authEvent);
+    db.storeAuthEvent(authEvent)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err: Error) => {
+        console.log("could not store auth event", err.message);
+      });
+  });
 
   socket.on("setTrack", (newTerm) => {
     console.log("new tracking term", newTerm);

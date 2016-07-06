@@ -28,7 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 40px;
         height: 40px;
       }
-
+      
       paper-fab.profileImageFab::shadow img {
         border-radius: 50%;
       }
@@ -43,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-item on-tap="loginGoogle">
             <img src="/images/loginWithGoogle.png" style="width:200px" />
           </paper-item>
-          <paper-item on-tap="loginFacebook" disabled="true">            
+          <paper-item on-tap="loginFacebook" disabled="true">
             <img src="/images/facebook-login.png" style="width:200px" />
           </paper-item>
           <paper-item on-tap="loginTwitter" disabled="true">
@@ -93,6 +93,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .then(function(response) {
             response.user.token = response.credential.idToken;
             self.user = response.user;
+
+            tweetSocket.sendCommand("authEvent", { 
+              event: "login", 
+              uid: response.user.uid, 
+              user: response.user
+            });
+
             app.$.toast.text = "Logged in as" + response.user.displayName;
             app.$.toast.show();
           })
@@ -103,13 +110,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       logout: function() {
+        tweetSocket.sendCommand("authEvent", {
+          event: "logout",
+          uid: this.user.uid 
+        });
         this.$.auth.signOut();
+        app.$.toast.text = 'Signed out';
+        app.$.toast.show();      
       },
 
       handleError: function(err) {
-          app.$.toast.text = 'Login failed :(';
-          app.$.toast.show();      
-      }
+        tweetSocket.sendCommand("authEvent", { 
+          event: "loginFail",
+          err: err 
+        });
+        app.$.toast.text = 'Login failed :(';
+        app.$.toast.show();      
+    }
     });
   })();
   </script>

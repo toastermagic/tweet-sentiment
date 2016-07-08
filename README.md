@@ -1,6 +1,8 @@
 # Simple Sentiment Analysis of Tweets
 
-<img src="app/images/predictionapi.png" style="height:24px"/> 
+<a href="https://cloud.google.com/prediction/">
+  <img src="app/images/predictionapi.png" style="height:24px"/> 
+</a>
 
 ## What it does
 
